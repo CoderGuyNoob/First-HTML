@@ -1,0 +1,33 @@
+<div class="nav-bar-wrapper">
+  <button id="themeToggle" class="theme-toggle-btn">
+    <span id="themeText">Dark Mode</span>
+  </button>
+
+  <div class="nav-background">
+    <a href="home.html" class="nav-button">Home</a>
+    <a href="facts.html" class="nav-button">Facts</a>
+    <a href="about.html" class="nav-button">About</a>
+  </div>
+
+  <script>
+    (function () {
+      const btn = document.getElementById("themeToggle");
+      const text = document.getElementById("themeText");
+
+      const updateUI = () => {
+        const isDark =
+          document.documentElement.classList.contains("dark-theme");
+        text.innerText = isDark ? "Light Mode" : "Dark Mode";
+      };
+
+      // Set initial button text based on the class set in <head>
+      updateUI();
+
+      btn.addEventListener("click", () => {
+        const isDark = document.documentElement.classList.toggle("dark-theme");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        updateUI();
+      });
+    })();
+  </script>
+</div>
