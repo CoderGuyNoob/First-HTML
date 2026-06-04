@@ -5,15 +5,27 @@
 
   /* --- SYNCHRONIZED RATIO ENGINE (Light Mode Anchor) --- */
   /* Your chosen slate-blue color converted to HSL */
-  --blue-h: 214; 
-  --blue-s: 21%; 
-  --blue-l: 46%; 
+  --blue-h: 214;
+  --blue-s: 21%;
+  --blue-l: 46%;
 
   /* Light Mode Ratios: Buttons are DARKER than the nav container */
-  --nav-bg: hsl(var(--blue-h), var(--blue-s), var(--blue-l));                             /* Exact rgb(94, 115, 143) */
-  --btn-bg: hsl(var(--blue-h), calc(var(--blue-s) + 15%), calc(var(--blue-l) - 12%));      /* Darker slate button */
-  --btn-hover: hsl(var(--blue-h), calc(var(--blue-s) + 15%), calc(var(--blue-l) - 20%));   /* Deep slate on hover */
-  --glow-color: hsla(var(--blue-h), var(--blue-s), var(--blue-l), 0.4);                   
+  --nav-bg: hsl(
+    var(--blue-h),
+    var(--blue-s),
+    var(--blue-l)
+  ); /* Exact rgb(94, 115, 143) */
+  --btn-bg: hsl(
+    var(--blue-h),
+    calc(var(--blue-s) + 15%),
+    calc(var(--blue-l) - 12%)
+  ); /* Darker slate button */
+  --btn-hover: hsl(
+    var(--blue-h),
+    calc(var(--blue-s) + 15%),
+    calc(var(--blue-l) - 20%)
+  ); /* Deep slate on hover */
+  --glow-color: hsla(var(--blue-h), var(--blue-s), var(--blue-l), 0.4);
   /* ---------------------------------------------------- */
 
   /* Layout */
@@ -24,16 +36,33 @@
 .dark-theme {
   --bg-page: #020617;
   --text-body: #f8fafc;
-  
+
   /* --- REVERSE MATCH RATIO ENGINE (Dark Mode) --- */
   /* We shift the base lightness down to 15% to make it dark mode friendly */
-  --blue-l: 15%; 
+  --blue-l: 15%;
 
   /* Dark Mode Ratios: Buttons are LIGHTER than the nav container */
-  --nav-bg: hsl(var(--blue-h), var(--blue-s), var(--blue-l));                             /* Deep midnight slate container */
-  --btn-bg: hsl(var(--blue-h), calc(var(--blue-s) + 10%), calc(var(--blue-l) + 12%));      /* Lighter slate button pops out */
-  --btn-hover: hsl(var(--blue-h), calc(var(--blue-s) + 15%), calc(var(--blue-l) + 20%));   /* Even lighter on hover */
-  --glow-color: hsla(var(--blue-h), var(--blue-s), calc(var(--blue-l) + 30%), 0.3);       
+  --nav-bg: hsl(
+    var(--blue-h),
+    var(--blue-s),
+    var(--blue-l)
+  ); /* Deep midnight slate container */
+  --btn-bg: hsl(
+    var(--blue-h),
+    calc(var(--blue-s) + 10%),
+    calc(var(--blue-l) + 12%)
+  ); /* Lighter slate button pops out */
+  --btn-hover: hsl(
+    var(--blue-h),
+    calc(var(--blue-s) + 15%),
+    calc(var(--blue-l) + 20%)
+  ); /* Even lighter on hover */
+  --glow-color: hsla(
+    var(--blue-h),
+    var(--blue-s),
+    calc(var(--blue-l) + 30%),
+    0.3
+  );
   /* ---------------------------------------------------- */
 }
 
@@ -92,8 +121,8 @@ body {
   white-space: nowrap;
   transition:
     padding 0.25s ease,
-    background-color 0.4s ease, /* Smooth theme transition */
-    box-shadow 0.25s ease,
+    background-color 0.4s ease,
+    /* Smooth theme transition */ box-shadow 0.25s ease,
     transform 0.2s ease;
 }
 
