@@ -16,7 +16,7 @@ jobs:
       - name: Sync Files to Python Site Directory
         shell: powershell
         run: |
-          $sitePath = "C:\Users\carri\vir dev\First HTML"
+          $sitePath = "C:\Users\carri\vir dev\live-site"
 
           # This safely grabs files from the runner directory and mirrors them into your website directory
           robocopy . $sitePath /MIR /XD .git .github /R:3 /W:1
