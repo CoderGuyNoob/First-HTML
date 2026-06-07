@@ -24,3 +24,6 @@ jobs:
           if ($LastExitCode -le 3) { $global:LastExitCode = 0 }
           
           Write-Host "Code successfully updated on vir-s-laptop!" -ForegroundColor Green
+          
+          cd $sitePath
+          git checkout -- Home.html; git pull
