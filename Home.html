@@ -9,6 +9,7 @@
     <script>
       (function () {
         const savedTheme = localStorage.getItem("theme");
+
         if (
           savedTheme === "dark" ||
           (!savedTheme &&
@@ -19,30 +20,34 @@
       })();
     </script>
   </head>
+
   <body>
     <div id="navbar"></div>
 
-    <div class="hollow-box"></div>
+    <div class="hollow-box">
+      <p><b>Hello</b></p>
+    </div>
+
     <script>
-      // Fetch and inject navbar
       fetch("navbar.html")
         .then((res) => res.text())
         .then((data) => {
           document.getElementById("navbar").innerHTML = data;
 
-          // Re-trigger script execution for injected HTML
           const scripts = document
             .getElementById("navbar")
             .querySelectorAll("script");
+
           scripts.forEach((oldScript) => {
             const newScript = document.createElement("script");
             newScript.text = oldScript.text;
-            document.body
-              .appendChild(newScript)
-              .parentNode.removeChild(newScript);
+
+            document.body.appendChild(newScript);
+            document.body.removeChild(newScript);
           });
         });
     </script>
+
     <script src="title.js"></script>
   </body>
 </html>

@@ -1,141 +1,166 @@
-/* 1. Theme Variables */
+/* =========================
+   1. Theme Variables
+   ========================= */
+
 :root {
   --bg-page: #f8fafc;
   --text-body: #1e293b;
 
-  /* --- SYNCHRONIZED RATIO ENGINE (Light Mode Anchor) --- */
-  /* Your chosen slate-blue color converted to HSL */
   --blue-h: 214;
   --blue-s: 21%;
   --blue-l: 46%;
 
-  /* Light Mode Ratios: Buttons are DARKER than the nav container */
-  --nav-bg: hsl(
-    var(--blue-h),
-    var(--blue-s),
-    var(--blue-l)
-  ); /* Exact rgb(94, 115, 143) */
+  --nav-bg: hsl(var(--blue-h), var(--blue-s), var(--blue-l));
+
   --btn-bg: hsl(
     var(--blue-h),
     calc(var(--blue-s) + 15%),
     calc(var(--blue-l) - 12%)
-  ); /* Darker slate button */
+  );
+
   --btn-hover: hsl(
     var(--blue-h),
     calc(var(--blue-s) + 15%),
     calc(var(--blue-l) - 20%)
-  ); /* Deep slate on hover */
-  --glow-color: hsla(var(--blue-h), var(--blue-s), var(--blue-l), 0.4);
-  /* ---------------------------------------------------- */
+  );
 
-  /* Layout */
+  --glow-color: hsla(var(--blue-h), var(--blue-s), var(--blue-l), 0.4);
+
   --navbar-height: 60px;
 }
 
-/* Dark Theme */
+/* =========================
+   2. Dark Theme
+   ========================= */
+
 .dark-theme {
   --bg-page: #020617;
   --text-body: #f8fafc;
 
-  /* --- REVERSE MATCH RATIO ENGINE (Dark Mode) --- */
-  /* We shift the base lightness down to 15% to make it dark mode friendly */
   --blue-l: 15%;
 
-  /* Dark Mode Ratios: Buttons are LIGHTER than the nav container */
-  --nav-bg: hsl(
-    var(--blue-h),
-    var(--blue-s),
-    var(--blue-l)
-  ); /* Deep midnight slate container */
+  --nav-bg: hsl(var(--blue-h), var(--blue-s), var(--blue-l));
+
   --btn-bg: hsl(
     var(--blue-h),
     calc(var(--blue-s) + 10%),
     calc(var(--blue-l) + 12%)
-  ); /* Lighter slate button pops out */
+  );
+
   --btn-hover: hsl(
     var(--blue-h),
     calc(var(--blue-s) + 15%),
     calc(var(--blue-l) + 20%)
-  ); /* Even lighter on hover */
+  );
+
   --glow-color: hsla(
     var(--blue-h),
     var(--blue-s),
     calc(var(--blue-l) + 30%),
     0.3
   );
-  /* ---------------------------------------------------- */
 }
 
-/* 2. Global Styles */
+/* =========================
+   3. Global Styles
+   ========================= */
+
+html,
 body {
   margin: 0;
+  padding: 0;
+}
+
+body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: var(--bg-page);
   color: var(--text-body);
+
   transition:
     background-color 0.4s ease,
     color 0.4s ease;
 }
 
-/* 3. Navbar Styling */
+/* =========================
+   4. Navbar
+   ========================= */
+
 .nav-bar-wrapper {
   height: var(--navbar-height);
+
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 0 20px;
+
   gap: 15px;
+  padding: 0 20px;
+
   box-sizing: border-box;
 }
 
 .theme-toggle-btn {
   padding: 8px 15px;
+
+  border: none;
   border-radius: 10px;
+  outline: none;
+
   background-color: var(--btn-bg);
   color: white;
-  border: none;
-  outline: none;
+
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.4s ease; /* Synced transition timing */
+
+  transition: all 0.4s ease;
 }
 
 .nav-background {
   display: flex;
   gap: 5px;
+
   padding: 5px;
+
   background-color: var(--nav-bg);
   border-radius: 12px;
+
   transition: background-color 0.4s ease;
 }
 
 .nav-button {
-  text-decoration: none;
+  display: inline-block;
+
+  padding: 10px 15px;
+
+  background-color: var(--btn-bg);
   color: white;
+
+  text-decoration: none;
   font-size: 16px;
   font-weight: bold;
-  padding: 10px 15px;
-  background-color: var(--btn-bg);
+
   border-radius: 10px;
-  display: inline-block;
   white-space: nowrap;
+
   transition:
     padding 0.25s ease,
     background-color 0.4s ease,
-    /* Smooth theme transition */ box-shadow 0.25s ease,
+    box-shadow 0.25s ease,
     transform 0.2s ease;
 }
 
-/* Desktop Interactions */
+/* Desktop Hover */
+
 @media (hover: hover) {
   .nav-button:hover {
-    background-color: var(--btn-hover);
     padding: 10px 30px;
+
+    background-color: var(--btn-hover);
     box-shadow: 0 0 15px var(--glow-color);
   }
 }
 
-/* Mobile Interactions */
+/* Mobile Tap */
+
 @media (pointer: coarse) {
   .nav-button:active {
     transform: scale(0.95);
@@ -143,15 +168,109 @@ body {
   }
 }
 
-/* 4. Hollow Box */
+/* =========================
+   5. Hollow Box
+   ========================= */
+
 .hollow-box {
   width: calc(100vw - 20px);
-  height: calc(100vh - 20px - var(--navbar-height));
+  height: calc(100vh - var(--navbar-height) - 20px);
 
   margin: 10px auto;
+  padding: 10px;
 
   border: 2px solid var(--btn-bg);
   border-radius: 10px;
+
   box-sizing: border-box;
-  transition: border-color 0.4s ease; /* Smooth theme transition */
+
+  color: var(--text-body);
+
+  transition:
+    border-color 0.4s ease,
+    color 0.4s ease;
+}
+
+/* Prevent first element from creating
+   a mysterious top gap */
+
+.hollow-box > :first-child {
+  margin-top: 0;
+}
+
+/* Prevent last element from creating
+   extra space at the bottom */
+
+.hollow-box > :last-child {
+  margin-bottom: 0;
+}
+.recipe-app {
+  display: flex;
+  height: calc(100vh - 80px);
+}
+
+.recipe-sidebar {
+  width: 320px;
+  border-right: 1px solid var(--border-color, #ccc);
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.recipe-main input,
+.recipe-main textarea {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+}
+
+.recipe-main textarea {
+  min-height: 120px;
+}
+
+#search {
+  padding: 12px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+}
+
+#recipeList {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.recipe-card {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.recipe-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.recipe-card-title {
+  font-weight: bold;
+}
+
+.recipe-card-tags {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.sidebar-buttons {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
 }
