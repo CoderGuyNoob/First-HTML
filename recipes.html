@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Recipes</title>
+
+<link rel="stylesheet" href="styles.css">
+
+<script>
+(function () {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (
+        savedTheme === "dark" ||
+        (!savedTheme &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+        document.documentElement.classList.add("dark-theme");
+    }
+})();
+</script>
+
+</head>
+
+<body>
+
+<div id="navbar"></div>
+
+<div class="recipe-app">
+
+    <div class="recipe-sidebar">
+
+        <input id="search" placeholder="Search recipes...">
+
+        <div id="recipeList"></div>
+
+        <button onclick="newRecipe()">
+            New Recipe
+        </button>
+
+    </div>
+
+    <div class="recipe-main">
+
+        <!-- VIEW MODE -->
+
+        <div id="viewMode" class="empty">
+
+            <h1 id="recipeTitle">
+                Select a recipe
+            </h1>
+
+            <p id="recipeTags"></p>
+
+            <div id="recipeDetails" style="display:none">
+
+                <h3>Ingredients</h3>
+                <pre id="recipeIngredients"></pre>
+
+                <h3>Instructions</h3>
+                <pre id="recipeInstructions"></pre>
+
+                <h3>Nutrition</h3>
+                <pre id="recipeNutrition"></pre>
+
+                <button onclick="editRecipe()">
+                    Edit
+                </button>
+
+                <button onclick="deleteRecipe()">
+                    Delete
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- EDIT MODE -->
+
+        <div id="editMode" style="display:none">
+
+            <input id="title" placeholder="Title">
+
+            <input id="tags" placeholder="Tags">
+
+            <input
+                id="servings"
+                type="number"
+                placeholder="Servings"
+            >
+
+            <h3>Ingredients</h3>
+            <textarea id="ingredients"></textarea>
+
+            <h3>Instructions</h3>
+            <textarea id="instructions"></textarea>
+
+            <h3>Nutrition</h3>
+            <textarea id="nutrition"></textarea>
+
+            <button onclick="saveRecipe()">
+                Save
+            </button>
+
+            <button onclick="cancelEdit()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+// NAVBAR
+
+fetch("navbar.html")
+.then(r => r.text())
+.then(data => {
+    document.getElementById("navbar").innerHTML = data;
+});
+
+
+// ELEMENT REFERENCES
+
+const searchBox = document.getElementById("search");
+const recipeList = document.getElementById("recipeList");
+
+const recipeDetails = document.getElementById("recipeDetails");
+const recipeTitle = document.getElementById("recipeTitle");
+const recipeTags = document.getElementById("recipeTags");
+const recipeIngredients = document.getElementById("recipeIngredients");
+const recipeInstructions = document.getElementById("recipeInstructions");
+const recipeNutrition = document.getElementById("recipeNutrition");
+
+const viewMode = document.getElementById("viewMode");
+const editMode = document.getElementById("editMode");
+
+const titleInput = document.getElementById("title");
+const tagsInput = document.getElementById("tags");
+const servingsInput = document.getElementById("servings");
+
+const ingredientsInput = document.getElementById("ingredients");
+const instructionsInput = document.getElementById("instructions");
+const nutritionInput = document.getElementById("nutrition");
+
+
+// STATE
+
+let recipes = [];
+let selected = null;
+
+
+// LOAD RECIPE LIST
+
+async function loadRecipes() {
+
+    const response = await fetch("/api/recipes");
+
+    recipes = await response.json();
+
+    renderList();
+}
+
+
+// RENDER SIDEBAR
+
+function renderList() {
+
+    recipeList.innerHTML = "";
+
+    const query =
+        searchBox.value.toLowerCase();
+
+    recipes
+    .filter(recipe =>
+        recipe.title
+            .toLowerCase()
+            .includes(query)
+    )
+    .forEach(recipe => {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "recipe-card";
+
+        div.innerHTML = `
+            <div class="recipe-card-title">
+                ${recipe.title}
+            </div>
+
+            <div class="recipe-card-tags">
+                ${recipe.tags || ""}
+            </div>
+        `;
+
+        div.onclick = async () => {
+            await openRecipe(recipe.id);
+        };
+
+        recipeList.appendChild(div);
+
+    });
+
+}
+
+
+// OPEN RECIPE
+
+async function openRecipe(id) {
+
+    const response =
+        await fetch(`/api/recipes/${id}`);
+
+    selected =
+        await response.json();
+
+    recipeTitle.textContent =
+        selected.title || "";
+
+    recipeTags.textContent =
+        selected.tags || "";
+
+    recipeIngredients.textContent =
+        selected.ingredients || "";
+
+    recipeInstructions.textContent =
+        selected.instructions || "";
+
+    recipeNutrition.textContent =
+        selected.nutrition || "";
+
+    recipeDetails.style.display = "block";
+    viewMode.classList.remove("empty");
+
+    showView();
+
+}
+
+
+// SHOW VIEW MODE
+
+function showView() {
+
+    viewMode.style.display = "block";
+
+    editMode.style.display = "none";
+
+}
+
+
+// SHOW EDIT MODE
+
+function editRecipe() {
+
+    if (!selected)
+        return;
+
+    titleInput.value =
+        selected.title || "";
+
+    tagsInput.value =
+        selected.tags || "";
+
+    servingsInput.value =
+        selected.servings || "";
+
+    ingredientsInput.value =
+        selected.ingredients || "";
+
+    instructionsInput.value =
+        selected.instructions || "";
+
+    nutritionInput.value =
+        selected.nutrition || "";
+
+    viewMode.style.display = "none";
+
+    editMode.style.display = "block";
+
+}
+
+
+// SAVE
+
+async function saveRecipe() {
+
+    if (!selected)
+        return;
+
+    const data = {
+
+        title:
+            titleInput.value,
+
+        tags:
+            tagsInput.value,
+
+        servings:
+            servingsInput.value,
+
+        ingredients:
+            ingredientsInput.value,
+
+        instructions:
+            instructionsInput.value,
+
+        nutrition:
+            nutritionInput.value
+
+    };
+
+    await fetch(
+        `/api/recipes/${selected.id}`,
+        {
+            method: "PUT",
+
+            headers: {
+                "Content-Type":
+                "application/json"
+            },
+
+            body:
+            JSON.stringify(data)
+        }
+    );
+
+    await loadRecipes();
+
+    await openRecipe(selected.id);
+
+}
+
+
+// NEW RECIPE
+
+async function newRecipe() {
+
+    const response =
+        await fetch(
+            "/api/recipes",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                    "application/json"
+                },
+
+                body:
+                JSON.stringify({
+                    title: "New Recipe"
+                })
+            }
+        );
+
+    const data =
+        await response.json();
+
+    await loadRecipes();
+
+    await openRecipe(data.id);
+
+    editRecipe();
+
+}
+
+
+// DELETE
+
+async function deleteRecipe() {
+
+    if (!selected)
+        return;
+
+    if (
+        !confirm(
+            "Delete this recipe?"
+        )
+    ) {
+        return;
+    }
+
+    await fetch(
+        `/api/recipes/${selected.id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    selected = null;
+
+    await loadRecipes();
+
+    recipeTitle.textContent =
+        "Select a recipe";
+
+    recipeTags.textContent = "";
+    recipeIngredients.textContent = "";
+    recipeInstructions.textContent = "";
+    recipeNutrition.textContent = "";
+
+    recipeDetails.style.display = "none";
+    viewMode.classList.add("empty");
+
+    showView();
+
+}
+
+
+// CANCEL
+
+function cancelEdit() {
+
+    showView();
+
+}
+
+
+// SEARCH
+
+searchBox.addEventListener(
+    "input",
+    renderList
+);
+
+
+// START
+
+loadRecipes();
+
+</script>
+
+<script src="title.js"></script>
+
+</body>
+</html>
