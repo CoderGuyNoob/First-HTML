@@ -2,744 +2,431 @@
   box-sizing: border-box;
 }
 
-
 /* =========================
    1. Theme Variables
    ========================= */
-
 :root {
-
   --bg-page: #f8fafc;
   --text-body: #1e293b;
-
   --blue-h: 214;
   --blue-s: 21%;
   --blue-l: 46%;
-
   --nav-bg: hsl(var(--blue-h), var(--blue-s), var(--blue-l));
-
   --btn-bg: hsl(
     var(--blue-h),
     calc(var(--blue-s) + 15%),
     calc(var(--blue-l) - 12%)
   );
-
   --btn-hover: hsl(
     var(--blue-h),
     calc(var(--blue-s) + 15%),
     calc(var(--blue-l) - 20%)
   );
-
-  --glow-color:
-    hsla(var(--blue-h), var(--blue-s), var(--blue-l), .4);
-
-  --navbar-height:60px;
-
+  --glow-color: hsla(var(--blue-h), var(--blue-s), var(--blue-l), .4);
+  --navbar-height: 60px;
 }
-
-
 
 /* =========================
    2. Dark Theme
    ========================= */
-
 .dark-theme {
-
-  --bg-page:#020617;
-
-  --text-body:#f8fafc;
-
-  --blue-l:15%;
-
-
-  --nav-bg:
-  hsl(var(--blue-h),var(--blue-s),var(--blue-l));
-
-
-  --btn-bg:
-  hsl(
+  --bg-page: #020617;
+  --text-body: #f8fafc;
+  --blue-l: 15%;
+  --nav-bg: hsl(var(--blue-h), var(--blue-s), var(--blue-l));
+  --btn-bg: hsl(
     var(--blue-h),
-    calc(var(--blue-s)+10%),
-    calc(var(--blue-l)+12%)
+    calc(var(--blue-s) + 10%),
+    calc(var(--blue-l) + 12%)
   );
-
-
-  --btn-hover:
-  hsl(
+  --btn-hover: hsl(
     var(--blue-h),
-    calc(var(--blue-s)+15%),
-    calc(var(--blue-l)+20%)
+    calc(var(--blue-s) + 15%),
+    calc(var(--blue-l) + 20%)
   );
-
 }
-
-
-
 
 /* =========================
    3. Global
    ========================= */
-
-
 html,
 body {
-
- margin:0;
- padding:0;
-
+  margin: 0;
+  padding: 0;
 }
-
 
 body {
-
- font-family:
- Arial, Helvetica, sans-serif;
-
- background:
- var(--bg-page);
-
- color:
- var(--text-body);
-
- transition:
- background .4s,
- color .4s;
-
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-body);
+  transition: background .4s, color .4s;
 }
-
-
-
-
 
 /* =========================
    4. Navbar
    ========================= */
-
-
 .nav-bar-wrapper {
-
- height:var(--navbar-height);
-
- display:flex;
-
- justify-content:flex-end;
-
- align-items:center;
-
- gap:15px;
-
- padding:0 20px;
-
+  height: var(--navbar-height);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  padding: 0 20px;
 }
-
-
 
 .nav-background {
-
- display:flex;
-
- gap:5px;
-
- padding:5px;
-
- background:
- var(--nav-bg);
-
- border-radius:18px;
-
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  background: var(--nav-bg);
+  border-radius: 18px;
 }
-
-
 
 .nav-button,
 .theme-toggle-btn {
-
-
- background:
- var(--btn-bg);
-
- color:white;
-
- border:none;
-
- border-radius:16px;
-
- padding:10px 16px;
-
- font-weight:bold;
-
- cursor:pointer;
-
- text-decoration:none;
-
- transition:.3s;
-
+  background: var(--btn-bg);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  transition: .3s;
 }
-
-
 
 .nav-button:hover,
 .theme-toggle-btn:hover {
-
- background:
- var(--btn-hover);
-
- box-shadow:
- 0 0 15px var(--glow-color);
-
+  background: var(--btn-hover);
+  box-shadow: 0 0 15px var(--glow-color);
 }
-
-
 
 /* =========================
    5. Main Container
    ========================= */
-
-
 .hollow-box {
-
-
- width:
- calc(100vw - 20px);
-
-
- height:
- calc(100vh - var(--navbar-height) - 20px);
-
-
- margin:10px auto;
-
-
- border:
- 2px solid var(--btn-bg);
-
-
- border-radius:22px;
-
-
- padding:10px;
-
-
+  width: calc(100vw - 20px);
+  height: calc(100vh - var(--navbar-height) - 20px);
+  margin: 10px auto;
+  border: 2px solid var(--btn-bg);
+  border-radius: 22px;
+  padding: 10px;
 }
-
-
-
-
 
 /* =========================
-   6. Recipe App
+   6. Recipe App Layout
    ========================= */
-
-
 .recipe-app {
-
-
- width:
- calc(100vw - 20px);
-
-
- height:
- calc(100vh - var(--navbar-height) - 20px);
-
-
- margin:10px auto;
-
-
- display:flex;
-
-
- border:
- 2px solid var(--btn-bg);
-
-
- border-radius:22px;
-
-
- overflow:hidden;
-
-
+  width: calc(100vw - 20px);
+  height: calc(100vh - var(--navbar-height) - 20px);
+  margin: 10px auto;
+  display: flex;
+  border: 2px solid var(--btn-bg);
+  border-radius: 22px;
+  overflow: hidden;
 }
-
-
-
-
 
 /* Sidebar */
-
-
 .recipe-sidebar {
-
-
- width:320px;
-
-
- display:flex;
-
- flex-direction:column;
-
-
- background:
- var(--nav-bg);
-
-
- padding:12px;
-
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  background: var(--nav-bg);
+  padding: 12px;
 }
-
-
-
 
 #search {
-
-
- width:100%;
-
- padding:12px;
-
-
- border:none;
-
-
- border-radius:16px;
-
-
- background:
- var(--bg-page);
-
-
- color:
- var(--text-body);
-
-
- margin-bottom:12px;
-
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 16px;
+  background: var(--bg-page);
+  color: var(--text-body);
+  margin-bottom: 12px;
 }
-
-
-
 
 #recipeList {
-
- flex:1;
-
- overflow-y:auto;
-
+  flex: 1;
+  overflow-y: auto;
 }
-
-
-
-
 
 .recipe-card {
-
-
- background:
- var(--btn-bg);
-
-
- color:white;
-
-
- padding:12px 18px;
-
-
- margin-bottom:10px;
-
-
- border-radius:18px;
-
-
- cursor:pointer;
-
-
- transition:.25s;
-
+  background: var(--btn-bg);
+  color: white;
+  padding: 12px 18px;
+  margin-bottom: 10px;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: .25s;
 }
-
-
 
 .recipe-card:hover {
-
-
- background:
- var(--btn-hover);
-
-
- box-shadow:
- 0 0 15px var(--glow-color);
-
-
- transform:translateY(-2px);
-
+  background: var(--btn-hover);
+  box-shadow: 0 0 15px var(--glow-color);
+  transform: translateY(-2px);
 }
-
-
 
 .recipe-card-title {
-
- font-weight:bold;
-
+  font-weight: bold;
 }
-
-
 
 .recipe-card-tags {
-
- opacity:.8;
-
- font-size:.85rem;
-
+  opacity: .8;
+  font-size: .85rem;
 }
 
-
-
-
-
-/* =========================
-   Recipe Main
-   ========================= */
-
-
+/* Recipe Main Workspace Area */
 .recipe-main {
-
-
- flex:1;
-
-
- padding:20px;
-
-
- overflow-y:auto;
-
-
- display:flex;
- flex-direction:column;
-
-
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
-
-
 
 .recipe-main input,
 .recipe-main textarea {
-
-
- width:100%;
-
-
- padding:12px;
-
-
- margin-bottom:14px;
-
-
- border:
-
- 2px solid var(--btn-bg);
-
-
- border-radius:18px;
-
-
- background:
- var(--bg-page);
-
-
- color:
- var(--text-body);
-
-
- font-size:15px;
-
-
- font-family:inherit;
-
-
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border: 2px solid var(--btn-bg);
+  border-radius: 18px;
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-size: 15px;
+  font-family: inherit;
 }
-
-
 
 .recipe-main textarea {
-
- min-height:150px;
-
- resize:vertical;
-
+  min-height: 150px;
+  resize: vertical;
 }
-
-
 
 .recipe-main input:focus,
 .recipe-main textarea:focus {
-
-
- outline:none;
-
-
- box-shadow:
- 0 0 15px var(--glow-color);
-
-
+  outline: none;
+  box-shadow: 0 0 15px var(--glow-color);
 }
-
-
-
-
 
 pre {
-
-
- white-space:pre-wrap;
-
-
- font-family:inherit;
-
-
- background:
- var(--bg-page);
-
-
- border:
- 2px solid var(--btn-bg);
-
-
- border-radius:18px;
-
-
- padding:15px;
-
+  white-space: pre-wrap;
+  font-family: inherit;
+  background: var(--bg-page);
+  border: 2px solid var(--btn-bg);
+  border-radius: 18px;
+  padding: 15px;
 }
-
-
-
 
 /* =========================
-   Buttons
+   7. Buttons
    ========================= */
-
-
 button {
-
-
- background:
- var(--btn-bg);
-
-
- color:white;
-
-
- border:none;
-
-
- border-radius:18px;
-
-
- padding:12px 18px;
-
-
- font-weight:bold;
-
-
- cursor:pointer;
-
-
- transition:.25s;
-
-
+  background: var(--btn-bg);
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 12px 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .25s;
 }
-
-
 
 button:hover {
-
-
- background:
- var(--btn-hover);
-
-
- box-shadow:
- 0 0 15px var(--glow-color);
-
-
+  background: var(--btn-hover);
+  box-shadow: 0 0 15px var(--glow-color);
 }
-
-
 
 button:active {
-
- transform:scale(.96);
-
+  transform: scale(.96);
 }
-
-
-
-
 
 /* =========================
-   File / Inputs
+   8. File Inputs
    ========================= */
-
-
 input[type=file] {
-
-
- padding:10px;
-
-
- border-radius:18px;
-
-
- border:
- 2px solid var(--btn-bg);
-
-
- background:
- var(--bg-page);
-
-
- color:
- var(--text-body);
-
+  padding: 10px;
+  border-radius: 18px;
+  border: 2px solid var(--btn-bg);
+  background: var(--bg-page);
+  color: var(--text-body);
 }
-
-
 
 input[type=file]::file-selector-button {
-
-
- background:
- var(--btn-bg);
-
-
- color:white;
-
-
- border:none;
-
-
- border-radius:14px;
-
-
- padding:10px;
-
-
- cursor:pointer;
-
-
+  background: var(--btn-bg);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 10px;
+  cursor: pointer;
 }
-
-
-
 
 /* =========================
-   Edit/View
+   9. Edit/View Viewstates
    ========================= */
-
-
 #viewMode {
-
-
- animation:
- fade .2s ease;
-
- flex:1;
- display:flex;
- flex-direction:column;
-
+  animation: fade .2s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
-
 
 #viewMode.empty {
- align-items:center;
- justify-content:center;
- text-align:center;
-
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
-
 
 #viewMode:not(.empty) {
- align-items:flex-start;
- justify-content:flex-start;
- text-align:left;
-
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
 }
-
 
 #editMode {
-
-
- animation:
- fade .2s ease;
-
-
+  animation: fade .2s ease;
 }
-
-
 
 @keyframes fade {
-
- from {
- opacity:0;
- }
-
- to {
- opacity:1;
- }
-
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
+/* =========================
+   10. Custom Stylized Delete Modal
+   ========================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-box {
+  background: var(--bg-page);
+  border: 2px solid var(--btn-bg);
+  border-radius: 22px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
+}
+
+.modal-overlay.active .modal-box {
+  transform: scale(1);
+}
+
+.modal-box h3 {
+  margin-top: 0;
+  color: var(--text-body);
+}
+
+.modal-box p {
+  color: var(--text-body);
+  opacity: 0.9;
+  margin-bottom: 24px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-danger {
+  background: #ef4444;
+}
+.btn-danger:hover {
+  background: #dc2626;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-secondary {
+  background: #64748b;
+}
+.btn-secondary:hover {
+  background: #475569;
+  box-shadow: 0 0 15px rgba(100, 116, 139, 0.4);
+}
 
 /* =========================
-   Mobile Compatibility
+   11. Mobile Compatibility Settings
    ========================= */
-
 @media (max-width: 768px) {
+  body {
+     padding: 0;
+     overflow: hidden;
+  }
 
   .nav-bar-wrapper {
-     flex-wrap: wrap;
-     justify-content: center;
-     gap: 8px;
-     padding: 8px 10px;
-     height: auto;
-     min-height: var(--navbar-height);
+     justify-content: space-between;
+     gap: 6px;
+     padding: 6px 12px;
+     height: var(--navbar-height);
+     background: var(--nav-bg);
   }
 
   .nav-background {
-     flex-wrap: wrap;
-     justify-content: center;
+     background: transparent;
+     padding: 0;
+     gap: 2px;
   }
 
   .nav-button,
   .theme-toggle-btn {
-     padding: 8px 12px;
-     font-size: .85rem;
+     padding: 6px 10px;
+     font-size: .8rem;
+     border-radius: 10px;
+  }
+
+  .theme-toggle-btn {
+     order: -1;
   }
 
   .hollow-box {
-     width: 94vw;
-     height: 82vh;
-     margin: 6px auto;
-     padding: 8px;
-     border-radius: 16px;
+     width: 100vw;
+     height: calc(100vh - var(--navbar-height));
+     margin: 0;
+     padding: 12px;
+     border: none;
+     border-radius: 0;
   }
 
   .recipe-app {
      flex-direction: column;
-     width: 94vw;
-     height: 82vh;
-     margin: 6px auto;
-     border-radius: 16px;
+     width: 100vw;
+     height: calc(100vh - var(--navbar-height));
+     margin: 0;
+     border: none;
+     border-radius: 0;
   }
 
   .recipe-sidebar {
      width: 100%;
-     flex-direction: row;
-     flex-wrap: wrap;
-     gap: 8px;
-     padding: 10px;
-     max-height: 200px;
-     overflow-y: auto;
-     align-items: center; /* Ensures elements line up neatly horizontally */
+     flex-direction: column;
+     align-items: flex-start;
+     gap: 10px;
+     padding: 10px 12px;
+     max-height: none;
+     overflow-y: visible;
+     border-bottom: 1px solid var(--btn-bg);
   }
 
   #search {
@@ -749,24 +436,25 @@ input[type=file]::file-selector-button {
 
   #recipeList {
      display: flex;
+     flex-direction: row;
      flex-wrap: nowrap;
+     width: 100%;
      overflow-x: auto;
      gap: 8px;
-     padding-bottom: 4px;
-     min-height: 70px;
-     align-items: center; /* Keeps recipes matching the inline action button alignment */
+     padding-bottom: 6px;
   }
 
   .recipe-card {
-     min-width: 140px;
+     min-width: 100px;
      flex-shrink: 0;
      margin-bottom: 0;
-     /* FIXED FOR MOBILE: Perfectly matches the button responsive padding rule */
-     padding: 10px 14px; 
+     padding: 8px 10px;
      font-size: .85rem;
-     display: flex;
-     flex-direction: column;
-     justify-content: center;
+  }
+
+  .recipe-sidebar > button {
+     align-self: flex-end;
+     margin-top: 2px;
   }
 
   .recipe-main {
@@ -795,50 +483,31 @@ input[type=file]::file-selector-button {
   #viewMode {
      padding: 0;
   }
-
 }
 
-
 @media (max-width: 480px) {
-
   .nav-bar-wrapper {
-     flex-direction: column;
-     align-items: stretch;
+     padding: 4px 10px;
   }
 
-  .nav-background {
-     width: 100%;
-  }
-
-  .nav-button {
-     flex: 1;
-     text-align: center;
-     padding: 8px 6px;
-     font-size: .8rem;
-  }
-
+  .nav-button,
   .theme-toggle-btn {
-     width: 100%;
-     text-align: center;
+     padding: 5px 8px;
+     font-size: .75rem;
   }
 
   .hollow-box {
-     height: 75vh;
-  }
-
-  .recipe-app {
-     height: 75vh;
-  }
-
-  .recipe-sidebar {
-     max-height: 150px;
      padding: 8px;
   }
 
+  .recipe-sidebar {
+     padding: 8px 10px;
+     gap: 8px;
+  }
+
   .recipe-card {
-     min-width: 120px;
-     /* FIXED FOR SMALL MOBILE: Matches the tiny form factor inputs padding value */
-     padding: 10px 12px;
+     min-width: 80px;
+     padding: 6px 8px;
      font-size: .8rem;
   }
 
@@ -851,5 +520,4 @@ input[type=file]::file-selector-button {
      padding: 10px;
      font-size: 14px;
   }
-
 }

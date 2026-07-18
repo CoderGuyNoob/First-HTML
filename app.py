@@ -240,6 +240,46 @@ def delete(id):
 
 
 
+ALLOWED_EXT = {".html", ".css", ".js", ".json"}
+
+@app.get("/admin")
+def admin_page():
+    return send_from_directory(".", "admin.html")
+
+
+@app.get("/api/admin/files")
+def list_files():
+    files = []
+    for f in os.listdir("."):
+        if os.path.isfile(f) and os.path.splitext(f)[1] in ALLOWED_EXT:
+            files.append(f)
+    return jsonify(files)
+
+
+@app.get("/api/admin/file/<path:filename>")
+def read_file(filename):
+    ext = os.path.splitext(filename)[1]
+    if ext not in ALLOWED_EXT:
+        return jsonify({"error": "not allowed"}), 403
+    if not os.path.isfile(filename):
+        return jsonify({"error": "not found"}), 404
+    with open(filename, "r", encoding="utf-8") as f:
+        content = f.read()
+    return jsonify({"filename": filename, "content": content})
+
+
+@app.post("/api/admin/file/<path:filename>")
+def save_file(filename):
+    ext = os.path.splitext(filename)[1]
+    if ext not in ALLOWED_EXT:
+        return jsonify({"error": "not allowed"}), 403
+    data = request.json
+    content = data.get("content", "")
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(content)
+    return jsonify({"ok": True})
+
+
 init()
 
 

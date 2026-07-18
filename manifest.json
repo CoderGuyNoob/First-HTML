@@ -1,0 +1,11 @@
+{
+  "name": "Vir Maiya's Website",
+  "short_name": "Vir's Site",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#5f7a9e",
+  "orientation": "portrait-primary",
+  "icons": []
+}
