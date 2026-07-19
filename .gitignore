@@ -1,5 +1,14 @@
-data/recipes.db
-Carrie-s-Jeopardy.html
-Carrie-s-Jeopardy.css
-game-data.js
-jeopardy.js
+# Data files (game data, recipes)
+data/
+
+# Jeopardy game files (tracked locally, not in git)
+Jeopardy/jeopardy.html
+Jeopardy/jeopardy.css
+Jeopardy/jeopardy.js
+
+# Admin editor
+admin.html
+
+# Python cache
+__pycache__/
+*.pyc
