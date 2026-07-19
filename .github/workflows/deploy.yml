@@ -19,7 +19,7 @@ jobs:
           $sitePath = "C:\Users\carri\vir dev\First HTML"
 
           # This safely grabs files from the runner directory and mirrors them into your website directory
-          robocopy . $sitePath /MIR /XD .git .github /R:3 /W:1
+          robocopy . $sitePath /MIR /XD .git .github Jeopardy /R:3 /W:1
           
           if ($LastExitCode -le 3) { $global:LastExitCode = 0 }
           
