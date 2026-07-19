@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Editor</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    background: #2d2d2d;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid #3c3c3c;
+    flex-shrink: 0;
+  }
+  .header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ccc;
+  }
+  .header .actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-save {
+    background: #0e639c;
+    color: #fff;
+  }
+  .btn-save:hover { background: #1177bb; }
+
+  .btn-refresh {
+    background: #3c3c3c;
+    color: #ccc;
+  }
+  .btn-refresh:hover { background: #4a4a4a; }
+
+  .btn-home {
+    background: #3c3c3c;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 6px;
+  }
+  .btn-home:hover { background: #4a4a4a; }
+
+  #toast {
+    position: fixed; bottom: 20px; right: 24px; z-index: 200; pointer-events: none;
+    padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 13px;
+    opacity: 0; transform: translateY(10px); transition: all 0.25s;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.ok { background: #2d8a3e; color: #fff; }
+  #toast.err { background: #a31515; color: #fff; }
+
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 220px;
+    background: #252526;
+    border-right: 1px solid #3c3c3c;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-header {
+    padding: 12px 16px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    font-weight: 600;
+    border-bottom: 1px solid #3c3c3c;
+  }
+  .file-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+  .file-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.1s;
+  }
+  .file-item:hover { background: #2a2d2e; }
+  .file-item.active {
+    background: #37373d;
+    color: #fff;
+  }
+  .file-item .icon {
+    width: 16px;
+    text-align: center;
+    font-size: 14px;
+  }
+  .file-item .ext {
+    font-size: 10px;
+    color: #888;
+    margin-left: auto;
+  }
+
+  .editor-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .editor-header {
+    padding: 8px 16px;
+    background: #252526;
+    border-bottom: 1px solid #3c3c3c;
+    font-size: 12px;
+    color: #888;
+    flex-shrink: 0;
+  }
+  .editor-header span { color: #ccc; }
+
+  textarea {
+    flex: 1;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 16px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    tab-size: 2;
+  }
+
+  .status-bar {
+    background: #0e639c;
+    padding: 4px 16px;
+    font-size: 12px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: #666;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Code Editor</h1>
+  <div class="actions">
+    <a class="btn-home" href="/">&larr; Home</a>
+    <button class="btn btn-refresh" onclick="loadFileList()">Refresh</button>
+    <button class="btn btn-save" onclick="saveFile()">Save</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-header">Files</div>
+    <div class="file-list" id="fileList"></div>
+  </div>
+  <div class="editor-wrap">
+    <div class="editor-header" id="editorHeader">No file selected</div>
+    <textarea id="editor" placeholder="Select a file from the sidebar to start editing..." spellcheck="false"></textarea>
+    <div class="status-bar" id="statusBar">Ready</div>
+  </div>
+</div>
+
+<script>
+let currentFile = null;
+let originalContent = "";
+
+function toast(msg, ok) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = ok ? "show ok" : "show err";
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ""; }, 2500);
+}
+
+async function loadFileList() {
+  const list = document.getElementById("fileList");
+  list.innerHTML = '<div class="loading" style="padding:20px;color:#666;font-size:12px;">Loading...</div>';
+  try {
+    const res = await fetch("/api/admin/files");
+    const files = await res.json();
+    list.innerHTML = "";
+    for (const f of files.sort()) {
+      const ext = f.split(".").pop();
+      const icons = { html: "📄", css: "🎨", js: "📜", json: "📋", py: "🐍", md: "📝", txt: "📄" };
+      const item = document.createElement("div");
+      item.className = "file-item" + (currentFile === f ? " active" : "");
+      item.innerHTML = `<span class="icon">${icons[ext] || "📄"}</span>${f}<span class="ext">.${ext}</span>`;
+      item.onclick = () => openFile(f);
+      list.appendChild(item);
+    }
+  } catch (e) {
+    list.innerHTML = '<div class="loading" style="padding:20px;color:#a31515;font-size:12px;">Failed to load files</div>';
+  }
+}
+
+async function openFile(filename) {
+  document.querySelectorAll(".file-item").forEach(el => el.classList.remove("active"));
+  const items = document.getElementById("fileList").children;
+  for (let el of items) {
+    if (el.textContent.trim().startsWith(filename)) {
+      el.classList.add("active");
+      break;
+    }
+  }
+  currentFile = filename;
+  document.getElementById("editorHeader").innerHTML = "Editing: <span>" + filename + "</span>";
+  document.getElementById("statusBar").textContent = "Loading " + filename + "...";
+  document.getElementById("editor").value = "";
+  try {
+    const res = await fetch("/api/admin/file/" + encodeURIComponent(filename));
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    document.getElementById("editor").value = data.content;
+    originalContent = data.content;
+    document.getElementById("statusBar").textContent = filename + " — " + data.content.split("\n").length + " lines";
+  } catch (e) {
+    toast("Failed to load file: " + e.message, false);
+    document.getElementById("statusBar").textContent = "Error loading file";
+  }
+}
+
+async function saveFile() {
+  if (!currentFile) { toast("No file selected", false); return; }
+  const content = document.getElementById("editor").value;
+  document.getElementById("statusBar").textContent = "Saving " + currentFile + "...";
+  try {
+    const res = await fetch("/api/admin/file/" + encodeURIComponent(currentFile), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: content })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    originalContent = content;
+    toast("Saved " + currentFile, true);
+    document.getElementById("statusBar").textContent = currentFile + " — saved";
+  } catch (e) {
+    toast("Save failed: " + e.message, false);
+    document.getElementById("statusBar").textContent = "Save failed";
+  }
+}
+
+document.addEventListener("keydown", function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault();
+    saveFile();
+  }
+});
+
+loadFileList();
+</script>
+</body>
+</html>
