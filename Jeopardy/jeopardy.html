@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jeopardy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="jeopardy.css">
+  <style>
+    /* ── Landing screen ── */
+    #landing {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(10,14,32,1);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #landing.hidden { display: none; }
+
+    .landing-card {
+      background: rgba(16,22,48,1); border: 3px solid rgba(40,50,100,1);
+      border-radius: 28px; padding: 36px 32px 28px;
+      width: 100%; max-width: 400px; text-align: center;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+      animation: pop 0.3s ease;
+    }
+    @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .landing-card h1 {
+      font-family: 'Fredoka One', cursive; font-size: 26px;
+      color: rgba(60,80,180,1); margin-bottom: 6px;
+    }
+    .landing-card .sub {
+      font-size: 13px; color: rgba(120,130,175,1); margin-bottom: 24px; font-weight: 600;
+    }
+
+    .landing-card label {
+      display: block; font-size: 11px; color: rgba(120,130,175,1);
+      margin-bottom: 4px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; text-align: left;
+    }
+    .landing-card input {
+      width: 100%; background: rgba(8,10,26,1); border: 2px solid rgba(40,50,100,1);
+      color: rgba(220,220,240,1); padding: 12px 16px; border-radius: 12px;
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700;
+      outline: none; transition: border-color 0.2s;
+      margin-bottom: 16px; text-align: center;
+      letter-spacing: 3px;
+    }
+    .landing-card input:focus { border-color: rgba(60,80,180,1); }
+    .landing-card input::placeholder { letter-spacing: 1px; font-weight: 400; color: rgba(100,100,155,1); }
+
+    .landing-card .btn-play {
+      width: 100%; border: none; padding: 14px; border-radius: 14px;
+      background: rgba(60,80,180,1);
+      color: rgba(255,255,255,1); font-family: 'Fredoka One', cursive; font-size: 18px;
+      cursor: pointer; box-shadow: 0 5px 0 rgba(30,42,100,1);
+      transition: all 0.15s; margin-top: 4px;
+    }
+    .landing-card .btn-play:hover { filter: brightness(1.08); }
+    .landing-card .btn-play:active { box-shadow: 0 2px 0 rgba(30,42,100,1); transform: translateY(3px); }
+
+    .landing-error {
+      color: rgba(110,110,210,1); font-weight: 700; font-size: 13px;
+      margin-top: 12px; min-height: 18px;
+    }
+
+    .btn-create {
+      width: 100%; border: none; padding: 12px; border-radius: 14px;
+      background: rgba(30,42,100,1);
+      color: rgba(220,220,240,1); font-family: 'Fredoka One', cursive; font-size: 15px;
+      cursor: pointer; box-shadow: 0 5px 0 rgba(16,22,48,1);
+      transition: all 0.15s; margin-top: 12px;
+      text-decoration: none; display: block; text-align: center;
+    }
+    .btn-create:hover { filter: brightness(1.1); }
+    .btn-create:active { box-shadow: 0 2px 0 rgba(16,22,48,1); transform: translateY(3px); }
+  </style>
+</head>
+<body>
+  <div id="landing">
+    <div class="landing-card">
+      <h1>Jeopardy</h1>
+      <div class="sub">Enter your game code and password to play</div>
+      <label>Game Code</label>
+      <input type="text" id="inputCode" placeholder="ABC123" maxlength="6" autocomplete="off"
+             onkeydown="if(event.key==='Enter')document.getElementById('inputPw').focus()">
+      <label>Password</label>
+      <input type="password" id="inputPw" placeholder="Password" autocomplete="off"
+             onkeydown="if(event.key==='Enter')joinGame()">
+      <button class="btn-play" onclick="joinGame()">Play</button>
+      <a href="/admin" class="btn-create">Create New Game</a>
+      <div class="landing-error" id="landingError"></div>
+    </div>
+  </div>
+
+  <div class="app" id="gameUI" style="display:none">
+    <header>
+      <h1 id="gameTitle">Jeopardy</h1>
+      <p class="subtitle">Click a tile, reveal the answer, award points, and mark the clue complete.</p>
+      <div class="controls">
+        <button class="btn secondary" onclick="leaveGame()">Back</button>
+        <button class="btn" onclick="resetBoard()">Reset Board</button>
+        <button class="btn secondary" onclick="resetScores()">Reset Scores</button>
+      </div>
+    </header>
+
+    <section class="scoreboard" id="scoreboard" aria-label="Scoreboard"></section>
+
+    <main class="board" id="board" aria-label="Jeopardy board"></main>
+    <p class="footer-note">Tip: After opening a clue, use the +/- buttons under each team to apply that clue's value.</p>
+    <a href="/admin" class="admin-link" title="Edit game data">Admin</a>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" onclick="backdropClose(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalMeta">
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="clue" id="modalQuestion"></div>
+      <div class="answer" id="modalAnswer"></div>
+      <div class="modal-actions">
+        <button class="btn" onclick="showAnswer()">Show Answer</button>
+        <button class="btn secondary" onclick="markCompleteAndClose()">Mark Complete</button>
+        <button class="btn secondary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="wagerModal">
+    <div class="modal wager-modal" role="dialog" aria-modal="true">
+      <div class="wager-title" id="wagerTitle">Daily Double!</div>
+      <div class="wager-category" id="wagerCategory"></div>
+      <label class="wager-label">Place your wager</label>
+      <input type="number" id="wagerInput" class="wager-input" min="0" placeholder="0" autocomplete="off">
+      <div class="wager-max" id="wagerMax"></div>
+      <div class="wager-error" id="wagerError"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" onclick="cancelWager()">Back</button>
+        <button class="btn" onclick="confirmWager()">Lock In</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  let GAME_CODE = null;
+  let GAME_PW = null;
+
+  async function loadGameData(code, pw) {
+    const res = await fetch("/api/games/" + encodeURIComponent(code) + "/data?password=" + encodeURIComponent(pw));
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.error) return null;
+    return data;
+  }
+
+  async function joinGame() {
+    const code = document.getElementById("inputCode").value.trim().toUpperCase();
+    const pw = document.getElementById("inputPw").value.trim();
+    const err = document.getElementById("landingError");
+    err.textContent = "";
+
+    if (!code) { err.textContent = "Enter a game code"; return; }
+    if (!pw) { err.textContent = "Enter a password"; return; }
+
+    const data = await loadGameData(code, pw);
+    if (!data) { err.textContent = "Invalid game code or password"; return; }
+
+    GAME_CODE = code;
+    GAME_PW = pw;
+    localStorage.setItem("jeopardy_game", JSON.stringify({ code, pw }));
+
+    startGame(data);
+  }
+
+  function startGame(data) {
+    window.GAME_DATA = { categories: data.categories, cards: data.cards };
+    window.VALUES = data.values;
+    window.TEAM_COUNT = data.teamCount;
+    document.getElementById("gameTitle").textContent = data.name || "Jeopardy";
+
+    document.getElementById("landing").classList.add("hidden");
+    document.getElementById("gameUI").style.display = "block";
+
+    initGame();
+  }
+
+  function leaveGame() {
+    localStorage.removeItem("jeopardy_game");
+    GAME_CODE = null;
+    GAME_PW = null;
+    document.getElementById("gameUI").style.display = "none";
+    document.getElementById("landing").classList.remove("hidden");
+    document.getElementById("inputCode").value = "";
+    document.getElementById("inputPw").value = "";
+    document.getElementById("landingError").textContent = "";
+  }
+
+  (async function() {
+    const saved = localStorage.getItem("jeopardy_game") || localStorage.getItem("jeopardy_admin");
+    if (!saved) return;
+    try {
+      const { code, pw } = JSON.parse(saved);
+      const data = await loadGameData(code, pw);
+      if (!data) { localStorage.removeItem("jeopardy_game"); return; }
+      GAME_CODE = code;
+      GAME_PW = pw;
+      localStorage.setItem("jeopardy_game", JSON.stringify({ code, pw }));
+      startGame(data);
+    } catch (e) {
+      localStorage.removeItem("jeopardy_game");
+    }
+  })();
+  </script>
+  <script src="jeopardy.js"></script>
+</body>
+</html>

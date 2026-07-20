@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jeopardy Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: rgba(10,14,32,1);
+    color: rgba(220,225,245,1);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: rgba(60,80,180,1);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(81,81,194,0.4);
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 24px;
+    color: rgba(255,255,255,1);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  }
+  .header .back {
+    margin-left: auto;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.2s;
+  }
+  .header .back:hover { background: rgba(255,255,255,0.25); color: rgba(255,255,255,1); }
+
+  #toast {
+    position: fixed; top: 20px; right: 24px; z-index: 200; pointer-events: none;
+    padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px;
+    opacity: 0; transform: translateY(-10px); transition: all 0.3s;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.ok { background: rgba(60,80,180,1); color: rgba(255,255,255,1); box-shadow: 0 4px 16px rgba(81,81,194,0.4); }
+  #toast.err { background: rgba(30,42,100,1); color: rgba(220,225,245,1); box-shadow: 0 4px 16px rgba(42,42,106,0.4); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+
+  .bubble {
+    background: rgba(16,22,48,1);
+    border: 3px solid rgba(40,50,100,1);
+    border-radius: 24px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  }
+  .bubble-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    color: rgba(60,80,180,1);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  label {
+    display: block; font-size: 11px; color: rgba(120,130,175,1);
+    margin-bottom: 4px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%; background: rgba(8,10,26,1); border: 2px solid rgba(40,50,100,1);
+    color: rgba(220,225,245,1); padding: 10px 14px; border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: rgba(60,80,180,1); }
+  textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
+  select { cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237882af' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 32px;
+  }
+  select option { background: rgba(8,10,26,1); color: rgba(220,225,245,1); }
+
+  .settings-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+  .settings-row > div { min-width: 140px; }
+  .settings-row input[type="number"] { width: 100px; text-align: center; }
+
+  .btn {
+    border: none; padding: 10px 20px; border-radius: 14px;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 800; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:active { transform: scale(0.96); }
+
+  .btn-save {
+    background: rgba(60,80,180,1);
+    color: rgba(255,255,255,1); box-shadow: 0 4px 0 rgba(45,60,140,1);
+  }
+  .btn-save:hover { filter: brightness(1.08); }
+  .btn-save:active { box-shadow: 0 2px 0 rgba(45,60,140,1); transform: translateY(2px); }
+
+  .btn-discard {
+    background: rgba(40,50,100,1); color: rgba(100,110,160,1);
+    box-shadow: 0 4px 0 rgba(30,42,100,1);
+  }
+  .btn-discard:hover { background: rgba(55,65,130,1); }
+  .btn-discard:active { box-shadow: 0 2px 0 rgba(30,42,100,1); transform: translateY(2px); }
+
+  .btn-add {
+    background: rgba(60,80,180,1);
+    color: rgba(255,255,255,1); box-shadow: 0 4px 0 rgba(45,60,140,1);
+    font-size: 13px; padding: 8px 16px; border-radius: 16px;
+  }
+  .btn-add:hover { filter: brightness(1.08); }
+  .btn-add:active { box-shadow: 0 2px 0 rgba(45,60,140,1); transform: translateY(2px); }
+
+  .btn-add-big {
+    background: linear-gradient(135deg, rgba(60,80,180,1), rgba(45,60,140,1));
+    color: rgba(255,255,255,1); box-shadow: 0 4px 0 rgba(30,42,100,1);
+    padding: 14px 24px; border-radius: 18px; font-size: 15px;
+    width: 100%; justify-content: center;
+  }
+  .btn-add-big:hover { filter: brightness(1.08); }
+  .btn-add-big:active { box-shadow: 0 2px 0 rgba(30,42,100,1); transform: translateY(2px); }
+
+  .btn-remove-cat {
+    background: transparent; color: rgba(85,105,200,1); font-size: 12px;
+    padding: 6px 12px; border-radius: 10px; box-shadow: none;
+  }
+  .btn-remove-cat:hover { background: rgba(60,60,150,0.3); }
+
+  .btn-back {
+    background: rgba(40,50,100,1); color: rgba(100,110,160,1); box-shadow: 0 4px 0 rgba(30,42,100,1);
+    font-size: 13px; padding: 8px 16px; border-radius: 16px;
+  }
+  .btn-back:hover { background: rgba(55,65,130,1); }
+
+  .btn-delete-game {
+    background: rgba(42,42,106,0.4); color: rgba(85,105,200,1); box-shadow: none;
+    font-size: 12px; padding: 6px 12px; border-radius: 10px;
+  }
+  .btn-delete-game:hover { background: rgba(30,42,100,1); color: rgba(255,255,255,1); }
+
+  .actions { display: flex; gap: 12px; justify-content: flex-end; padding: 10px 0 40px; }
+
+  .cat-card {
+    background: rgba(18,22,42,1); border: 2px solid rgba(40,50,100,1);
+    border-radius: 20px; padding: 18px 20px; margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .cat-card:hover { border-color: rgba(55,65,120,1); }
+
+  .cat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .cat-header .cat-color { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .cat-header input {
+    flex: 1; background: transparent; border: none; border-bottom: 2px solid rgba(40,50,100,1);
+    color: rgba(60,80,180,1); font-family: 'Fredoka One', cursive; font-size: 18px;
+    padding: 4px 0; border-radius: 0;
+  }
+  .cat-header input:focus { border-bottom-color: rgba(60,80,180,1); }
+  .cat-actions { display: flex; gap: 6px; margin-left: auto; }
+
+  .q-row {
+    display: grid; grid-template-columns: 30px 90px 1fr 1fr 40px 40px;
+    gap: 10px; align-items: start; margin-bottom: 10px;
+    background: rgba(8,10,26,1); border-radius: 14px; padding: 12px;
+    border: 1px solid rgba(30,42,100,1);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .q-row.dragging { opacity: 0.4; transform: scale(0.98); }
+  .q-row.drag-over { border-color: rgba(60,80,180,1); box-shadow: 0 0 0 2px rgba(60,80,180,0.3); }
+  .q-row .pos-badge {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(60,80,180,1); color: rgba(255,255,255,1);
+    font-family: 'Fredoka One', cursive; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 18px; flex-shrink: 0;
+  }
+  .q-row .drag-handle {
+    cursor: grab; color: rgba(80,90,140,1); font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 18px; user-select: none; letter-spacing: -2px;
+  }
+  .q-row .drag-handle:active { cursor: grabbing; }
+  .q-row select {
+    width: 100%; height: 42px; text-align: center;
+    font-weight: 800; font-size: 14px; color: rgba(60,80,180,1);
+  }
+  .q-row textarea { min-height: 42px; font-size: 13px; padding: 10px 12px; }
+  .q-row .q-label {
+    font-size: 10px; color: rgba(120,130,175,1); text-transform: uppercase;
+    letter-spacing: 1px; font-weight: 700; margin-bottom: 4px;
+  }
+  .q-col { display: flex; flex-direction: column; }
+  .btn-del-q {
+    width: 36px; height: 36px; border-radius: 10px; border: none;
+    background: rgba(42,42,106,0.3); color: rgba(85,105,200,1); cursor: pointer;
+    font-size: 18px; display: flex; align-items: center; justify-content: center;
+    margin-top: 22px; transition: all 0.15s;
+  }
+  .btn-del-q:hover { background: rgba(30,42,100,1); color: rgba(255,255,255,1); }
+
+  .empty-state {
+    text-align: center; color: rgba(80,90,140,1); padding: 50px 20px;
+    font-size: 15px; font-weight: 600;
+  }
+  .empty-state .big-emoji { font-size: 48px; margin-bottom: 12px; }
+
+  .error-banner {
+    background: rgba(30,42,100,1); color: rgba(255,255,255,1); padding: 14px 20px;
+    border-radius: 12px; margin-bottom: 20px; font-weight: 600;
+    text-align: center; line-height: 1.5;
+  }
+
+  .game-list-item {
+    background: rgba(18,22,42,1); border: 2px solid rgba(40,50,100,1);
+    border-radius: 16px; padding: 14px 18px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 14px;
+    transition: border-color 0.2s;
+  }
+  .game-list-item:hover { border-color: rgba(55,65,120,1); }
+  .game-list-item .game-code {
+    font-family: 'Fredoka One', cursive; font-size: 20px;
+    color: rgba(60,80,180,1); letter-spacing: 2px;
+  }
+  .game-list-item .game-name { font-weight: 700; font-size: 15px; flex: 1; }
+  .game-list-item .game-date { font-size: 11px; color: rgba(80,90,140,1); }
+  .game-list-item .game-actions { display: flex; gap: 8px; margin-left: auto; }
+
+  .create-row {
+    display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+  }
+  .create-row > div { min-width: 150px; }
+  .create-row .pw-row { display: flex; gap: 8px; align-items: flex-end; }
+  .create-row .pw-row > div { flex: 1; }
+  .btn-gen {
+    background: rgba(40,50,100,1); color: rgba(60,80,180,1); border: none;
+    padding: 10px 14px; border-radius: 12px; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+    white-space: nowrap; transition: all 0.15s;
+  }
+  .btn-gen:hover { background: rgba(55,65,130,1); }
+
+  .modal-bg {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+
+  .modal-box {
+    background: rgba(16,22,48,1); border: 3px solid rgba(60,80,180,1);
+    border-radius: 24px; padding: 28px 28px 22px;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: modalPop 0.2s ease;
+  }
+  @keyframes modalPop {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .modal-box h2 {
+    font-family: 'Fredoka One', cursive; color: rgba(60,80,180,1);
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .modal-box input { margin-bottom: 18px; }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-btns .btn-cancel {
+    background: rgba(40,50,100,1); color: rgba(100,110,160,1); box-shadow: 0 4px 0 rgba(30,42,100,1);
+  }
+  .modal-btns .btn-cancel:hover { background: rgba(55,65,130,1); }
+  .modal-btns .btn-confirm {
+    background: rgba(60,80,180,1);
+    color: rgba(255,255,255,1); box-shadow: 0 4px 0 rgba(45,60,140,1);
+  }
+  .modal-btns .btn-confirm:hover { filter: brightness(1.08); }
+
+  .pill-0 { background: rgba(60,80,180,1); }  .pill-1 { background: rgba(60,80,180,1); }
+  .pill-2 { background: rgba(60,80,180,1); }  .pill-3 { background: rgba(79,195,247,1); }
+  .pill-4 { background: rgba(206,147,216,1); }  .pill-5 { background: rgba(255,138,101,1); }
+  .pill-6 { background: rgba(128,203,196,1); }  .pill-7 { background: rgba(60,80,180,1); }
+  .pill-8 { background: rgba(102,187,106,1); }  .pill-9 { background: rgba(60,80,180,1); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Jeopardy Admin</h1>
+  <a class="back" href="/Jeopardy/jeopardy.html">&larr; Back to Game</a>
+</div>
+
+<div id="toast"></div>
+
+<div class="container">
+  <div id="error"></div>
+
+  <div id="view-list">
+    <div class="bubble">
+      <div class="bubble-title">Create New Game</div>
+      <div class="create-row">
+        <div>
+          <label>Game Name</label>
+          <input type="text" id="newName" placeholder="e.g. Biology 101">
+        </div>
+        <div>
+          <label>Password (alphanumeric)</label>
+          <div class="pw-row">
+            <div><input type="text" id="newPw" placeholder="Type or generate"></div>
+            <button class="btn-gen" onclick="genPw()">Generate</button>
+          </div>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn btn-save" onclick="createGame()">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bubble">
+      <div class="bubble-title">Your Games</div>
+      <div id="gameList"></div>
+    </div>
+  </div>
+
+  <div id="view-editor" style="display:none">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <button class="btn btn-back" onclick="backToList()">&larr; Games</button>
+      <span style="font-family:'Fredoka One',cursive; font-size:18px; color:rgba(60,80,180,1);" id="editorTitle"></span>
+      <span style="font-family:'Fredoka One',cursive; font-size:14px; color:rgba(60,80,180,1); letter-spacing:2px;" id="editorCode"></span>
+      <span style="font-size:11px; color:rgba(120,130,175,1);" id="editorPw"></span>
+    </div>
+
+    <div class="bubble">
+      <div class="bubble-title">Settings</div>
+      <div class="settings-row">
+        <div>
+          <label>Teams</label>
+          <input type="number" id="teamCount" min="1" max="10" value="3">
+        </div>
+        <div style="flex:1">
+          <label>Value Tiers (comma-separated)</label>
+          <input type="text" id="values" value="100, 200, 300, 400, 500">
+        </div>
+      </div>
+    </div>
+
+    <div id="categories"></div>
+
+    <button class="btn btn-add-big" onclick="addCategory()">+ New Category</button>
+
+    <div class="actions">
+      <button class="btn btn-discard" onclick="loadGameData()">Discard</button>
+      <button class="btn btn-save" onclick="saveGameData()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <h2>New Category</h2>
+    <input type="text" id="modalInput" placeholder="Category name..." onkeydown="if(event.key==='Enter')confirmModal()">
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-confirm" onclick="confirmModal()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="confirmBg" onclick="if(event.target===this)resolveConfirm(false)">
+  <div class="modal-box">
+    <h2 id="confirmTitle">Are you sure?</h2>
+    <p id="confirmMsg" style="color:rgba(120,130,175,1);margin-bottom:20px;font-size:14px;line-height:1.5;"></p>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="resolveConfirm(false)">Cancel</button>
+      <button class="btn btn-confirm" onclick="resolveConfirm(true)">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="promptBg" onclick="if(event.target===this)resolvePrompt(null)">
+  <div class="modal-box">
+    <h2 id="promptTitle">Enter value</h2>
+    <input type="text" id="promptInput" placeholder="" onkeydown="if(event.key==='Enter')resolvePrompt(document.getElementById('promptInput').value)">
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="resolvePrompt(null)">Cancel</button>
+      <button class="btn btn-confirm" onclick="resolvePrompt(document.getElementById('promptInput').value)">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentCode = null;
+let currentPw = null;
+let gameData = { categories: [], cards: [] };
+const CAT_COLORS = ['pill-0','pill-1','pill-2','pill-3','pill-4','pill-5','pill-6','pill-7','pill-8','pill-9'];
+
+function toast(msg, ok) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = ok ? "show ok" : "show err";
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ""; }, 2500);
+}
+
+function showError(msg) {
+  const el = document.getElementById("error");
+  el.innerHTML = msg ? '<div class="error-banner">' + msg + '</div>' : "";
+}
+
+// ── Styled confirm/prompt ──
+
+let _confirmResolve = null;
+function showConfirm(title, msg) {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    document.getElementById("confirmTitle").textContent = title;
+    document.getElementById("confirmMsg").textContent = msg;
+    document.getElementById("confirmBg").classList.add("open");
+  });
+}
+function resolveConfirm(val) {
+  document.getElementById("confirmBg").classList.remove("open");
+  if (_confirmResolve) { _confirmResolve(val); _confirmResolve = null; }
+}
+
+let _promptResolve = null;
+function showPrompt(title, placeholder) {
+  return new Promise(resolve => {
+    _promptResolve = resolve;
+    document.getElementById("promptTitle").textContent = title;
+    const inp = document.getElementById("promptInput");
+    inp.value = "";
+    inp.placeholder = placeholder || "";
+    document.getElementById("promptBg").classList.add("open");
+    setTimeout(() => inp.focus(), 50);
+  });
+}
+function resolvePrompt(val) {
+  document.getElementById("promptBg").classList.remove("open");
+  if (_promptResolve) { _promptResolve(val); _promptResolve = null; }
+}
+
+function genPw() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let pw = '';
+  for (let i = 0; i < 8; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById("newPw").value = pw;
+}
+
+// ── Game list ──
+
+async function loadGames() {
+  showError("");
+  try {
+    const res = await fetch("/api/games");
+    const games = await res.json();
+    const list = document.getElementById("gameList");
+    list.innerHTML = "";
+    if (games.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:rgba(80,90,140,1);padding:20px;">No games yet. Create one above!</div>';
+      return;
+    }
+    games.forEach(g => {
+      const div = document.createElement("div");
+      div.className = "game-list-item";
+      div.innerHTML =
+        '<span class="game-code">' + g.game_code + '</span>' +
+        '<span class="game-name">' + esc(g.name) + '</span>' +
+        '<span class="game-date">' + new Date(g.created_at).toLocaleDateString() + '</span>' +
+        '<div class="game-actions">' +
+          '<button class="btn btn-save" style="padding:6px 14px;font-size:12px;border-radius:10px;" onclick="editGame(\'' + g.game_code + '\')">Edit</button>' +
+          '<button class="btn btn-delete-game" onclick="deleteGame(\'' + g.game_code + '\',\'' + esc(g.name) + '\')">Delete</button>' +
+        '</div>';
+      list.appendChild(div);
+    });
+  } catch (e) {
+    showError("Could not load games. Is the server running?");
+  }
+}
+
+async function createGame() {
+  const name = document.getElementById("newName").value.trim();
+  const pw = document.getElementById("newPw").value.trim();
+  if (!name) { toast("Enter a game name", false); return; }
+  if (!pw) { toast("Enter or generate a password", false); return; }
+  if (!/^[A-Za-z0-9]+$/.test(pw)) { toast("Password must be alphanumeric", false); return; }
+
+  try {
+    const res = await fetch("/api/games/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, password: pw })
+    });
+    const data = await res.json();
+    if (data.error) { toast(data.error, false); return; }
+    toast("Game created! Code: " + data.game_code, true);
+    document.getElementById("newName").value = "";
+    document.getElementById("newPw").value = "";
+    loadGames();
+  } catch (e) {
+    toast("Failed to create game", false);
+  }
+}
+
+async function deleteGame(code, name) {
+  const ok = await showConfirm('Delete Game', 'Delete "' + name + '" (' + code + ")? This cannot be undone.");
+  if (!ok) return;
+  try {
+    await fetch("/api/games/" + code, { method: "DELETE" });
+    toast("Deleted", true);
+    loadGames();
+  } catch (e) {
+    toast("Failed to delete", false);
+  }
+}
+
+// ── Editor ──
+
+async function editGame(code) {
+  const pw = await showPrompt("Password for " + code, "Enter password");
+  if (!pw) return;
+  try {
+    const res = await fetch("/api/games/" + code + "/data?password=" + encodeURIComponent(pw));
+    if (!res.ok) { toast("Wrong password", false); return; }
+    const data = await res.json();
+    if (data.error) { toast(data.error, false); return; }
+    currentCode = code;
+    currentPw = pw;
+    localStorage.setItem("jeopardy_game", JSON.stringify({ code, pw }));
+    gameData = { categories: data.categories || [], cards: data.cards || [] };
+    document.getElementById("teamCount").value = data.teamCount || 3;
+    document.getElementById("values").value = (data.values || [100,200,300,400,500]).join(", ");
+
+    document.getElementById("editorTitle").textContent = document.querySelector('.game-list-item .game-name') ? "" : "";
+    document.getElementById("editorCode").textContent = code;
+    document.getElementById("editorPw").textContent = "Password: " + pw;
+
+    document.getElementById("view-list").style.display = "none";
+    document.getElementById("view-editor").style.display = "block";
+    renderAll();
+  } catch (e) {
+    toast("Could not load game", false);
+  }
+}
+
+function backToList() {
+  document.getElementById("view-list").style.display = "block";
+  document.getElementById("view-editor").style.display = "none";
+  currentCode = null;
+  currentPw = null;
+  localStorage.removeItem("jeopardy_game");
+  loadGames();
+}
+
+async function restoreSession() {
+  const saved = localStorage.getItem("jeopardy_game");
+  if (!saved) return false;
+  try {
+    const { code, pw } = JSON.parse(saved);
+    const res = await fetch("/api/games/" + code + "/data?password=" + encodeURIComponent(pw));
+    if (!res.ok) { localStorage.removeItem("jeopardy_game"); return false; }
+    const data = await res.json();
+    if (data.error) { localStorage.removeItem("jeopardy_game"); return false; }
+    currentCode = code;
+    currentPw = pw;
+    gameData = { categories: data.categories || [], cards: data.cards || [] };
+    document.getElementById("teamCount").value = data.teamCount || 3;
+    document.getElementById("values").value = (data.values || [100,200,300,400,500]).join(", ");
+    document.getElementById("editorCode").textContent = code;
+    document.getElementById("editorPw").textContent = "Password: " + pw;
+    document.getElementById("view-list").style.display = "none";
+    document.getElementById("view-editor").style.display = "block";
+    renderAll();
+    return true;
+  } catch (e) {
+    localStorage.removeItem("jeopardy_game");
+    return false;
+  }
+}
+
+// ── Render ──
+
+function renderAll() {
+  const wrap = document.getElementById("categories");
+  wrap.innerHTML = "";
+
+  if (gameData.categories.length === 0) {
+    wrap.innerHTML = '<div class="empty-state"><div class="big-emoji">No categories yet!</div>Click the button below to add your first category.</div>';
+    return;
+  }
+  gameData.categories.forEach((cat, ci) => wrap.appendChild(buildCatCard(cat, ci)));
+}
+
+function buildCatCard(catName, ci) {
+  const card = document.createElement("div");
+  card.className = "cat-card";
+  const colorClass = CAT_COLORS[ci % CAT_COLORS.length];
+  const values = getValues();
+
+  const header = document.createElement("div");
+  header.className = "cat-header";
+  header.innerHTML =
+    '<div class="cat-color ' + colorClass + '"></div>' +
+    '<input type="text" class="cat-name-input" value="' + esc(catName) + '">' +
+    '<div class="cat-actions"><button class="btn btn-remove-cat" title="Delete category">Delete</button></div>';
+  card.appendChild(header);
+
+  header.querySelector(".cat-name-input").addEventListener("input", function() {
+    const old = gameData.categories[ci];
+    const newName = this.value.trim();
+    gameData.categories[ci] = newName;
+    gameData.cards.forEach(c => { if (c.category === old) c.category = newName; });
+  });
+  header.querySelector(".btn-remove-cat").addEventListener("click", async () => {
+    const ok = await showConfirm('Delete Category', 'Delete "' + catName + '" and all its questions?');
+    if (!ok) return;
+    gameData.categories.splice(ci, 1);
+    gameData.cards = gameData.cards.filter(c => c.category !== catName);
+    renderAll();
+  });
+
+  const cards = getCardsForCategory(catName);
+  cards.forEach((c, qi) => {
+    const row = buildQRow(c, qi, values, catName);
+    card.appendChild(row);
+  });
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "btn btn-add";
+  addBtn.style.marginTop = "8px";
+  addBtn.innerHTML = "+ Add Question";
+  addBtn.onclick = () => {
+    gameData.cards.push({ category: catName, question: "", answer: "" });
+    renderAll();
+  };
+  card.appendChild(addBtn);
+
+  return card;
+}
+
+function buildQRow(c, qi, values, catName) {
+  const row = document.createElement("div");
+  row.className = "q-row";
+  row.draggable = true;
+  row.dataset.cat = catName;
+  row.dataset.idx = qi;
+
+  const dragHandle = document.createElement("div");
+  dragHandle.className = "drag-handle";
+  dragHandle.textContent = "⠿";
+  row.appendChild(dragHandle);
+
+  const posBadge = document.createElement("div");
+  posBadge.className = "pos-badge";
+  posBadge.textContent = qi < values.length ? "$" + values[qi] : "$?";
+  row.appendChild(posBadge);
+
+  const qCol = document.createElement("div");
+  qCol.className = "q-col";
+  qCol.innerHTML = '<div class="q-label">Question</div>';
+  const qArea = document.createElement("textarea");
+  qArea.value = c.question; qArea.placeholder = "Type the question...";
+  qArea.oninput = () => { c.question = qArea.value; };
+  qCol.appendChild(qArea);
+  row.appendChild(qCol);
+
+  const aCol = document.createElement("div");
+  aCol.className = "q-col";
+  aCol.innerHTML = '<div class="q-label">Answer</div>';
+  const aArea = document.createElement("textarea");
+  aArea.value = c.answer; aArea.placeholder = "Type the answer...";
+  aArea.oninput = () => { c.answer = aArea.value; };
+  aCol.appendChild(aArea);
+  row.appendChild(aCol);
+
+  const ddCol = document.createElement("div");
+  ddCol.className = "q-col";
+  ddCol.style.alignItems = "center";
+  ddCol.innerHTML = '<div class="q-label">DD</div>';
+  const ddCheck = document.createElement("input");
+  ddCheck.type = "checkbox";
+  ddCheck.checked = !!c.dailyDouble;
+  ddCheck.style.width = "auto";
+  ddCheck.style.margin = "22px 0 0";
+  ddCheck.style.accentColor = "rgba(60,80,180,1)";
+  ddCheck.onchange = () => { c.dailyDouble = ddCheck.checked; };
+  ddCol.appendChild(ddCheck);
+  row.appendChild(ddCol);
+
+  const delBtn = document.createElement("button");
+  delBtn.className = "btn-del-q";
+  delBtn.title = "Remove question";
+  delBtn.textContent = "\u00d7";
+  delBtn.onclick = () => {
+    const idx = gameData.cards.indexOf(c);
+    if (idx !== -1) gameData.cards.splice(idx, 1);
+    renderAll();
+  };
+  row.appendChild(delBtn);
+
+  // Drag events
+  row.addEventListener("dragstart", (e) => {
+    row.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", "");
+    window._dragRow = row;
+  });
+  row.addEventListener("dragend", () => {
+    row.classList.remove("dragging");
+    document.querySelectorAll(".q-row.drag-over").forEach(r => r.classList.remove("drag-over"));
+    window._dragRow = null;
+  });
+  row.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    const dragging = window._dragRow;
+    if (dragging && dragging.dataset.cat === catName) {
+      row.classList.add("drag-over");
+    }
+  });
+  row.addEventListener("dragleave", () => {
+    row.classList.remove("drag-over");
+  });
+  row.addEventListener("drop", (e) => {
+    e.preventDefault();
+    row.classList.remove("drag-over");
+    const dragging = window._dragRow;
+    if (!dragging || dragging.dataset.cat !== catName) return;
+    const fromIdx = parseInt(dragging.dataset.idx);
+    const toIdx = parseInt(row.dataset.idx);
+    if (fromIdx === toIdx) return;
+
+    const catCards = gameData.cards.filter(c => c.category === catName);
+    const movingCard = catCards[fromIdx];
+    const otherCards = gameData.cards.filter(c => c !== movingCard);
+
+    const insertBefore = otherCards.findIndex(c => c === catCards[toIdx]);
+    if (insertBefore === -1) {
+      otherCards.push(movingCard);
+    } else {
+      otherCards.splice(insertBefore, 0, movingCard);
+    }
+    gameData.cards = otherCards;
+    renderAll();
+  });
+
+  // Touch drag support
+  let touchStartY = 0;
+  let touchClone = null;
+  let touchDragging = false;
+  dragHandle.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    touchStartY = e.touches[0].clientY;
+    touchDragging = true;
+    row.classList.add("dragging");
+    window._dragRow = row;
+  }, { passive: false });
+  dragHandle.addEventListener("touchmove", (e) => {
+    if (!touchDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const allRows = Array.from(document.querySelectorAll(`.q-row[data-cat="${catName}"]`));
+    allRows.forEach(r => r.classList.remove("drag-over"));
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetRow = target ? target.closest(".q-row") : null;
+    if (targetRow && targetRow.dataset.cat === catName && targetRow !== row) {
+      targetRow.classList.add("drag-over");
+    }
+  }, { passive: false });
+  dragHandle.addEventListener("touchend", (e) => {
+    if (!touchDragging) return;
+    touchDragging = false;
+    row.classList.remove("dragging");
+    const touch = e.changedTouches[0];
+    const allRows = Array.from(document.querySelectorAll(`.q-row[data-cat="${catName}"]`));
+    allRows.forEach(r => r.classList.remove("drag-over"));
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetRow = target ? target.closest(".q-row") : null;
+    if (targetRow && targetRow.dataset.cat === catName && targetRow !== row) {
+      const fromIdx = parseInt(row.dataset.idx);
+      const toIdx = parseInt(targetRow.dataset.idx);
+      const catCards = gameData.cards.filter(c => c.category === catName);
+      const movingCard = catCards[fromIdx];
+      const otherCards = gameData.cards.filter(c => c !== movingCard);
+      const insertBefore = otherCards.findIndex(c => c === catCards[toIdx]);
+      if (insertBefore === -1) {
+        otherCards.push(movingCard);
+      } else {
+        otherCards.splice(insertBefore, 0, movingCard);
+      }
+      gameData.cards = otherCards;
+      renderAll();
+    }
+    window._dragRow = null;
+  });
+
+  return row;
+}
+
+// ── Add category ──
+
+function addCategory() {
+  document.getElementById("modalInput").value = "";
+  document.getElementById("modalBg").classList.add("open");
+  setTimeout(() => document.getElementById("modalInput").focus(), 50);
+}
+
+function confirmModal() {
+  const name = document.getElementById("modalInput").value.trim();
+  if (!name) return;
+  gameData.categories.push(name);
+  renderAll();
+  closeModal();
+}
+
+function closeModal() {
+  document.getElementById("modalBg").classList.remove("open");
+}
+
+// ── Helpers ──
+
+function getValues() {
+  return document.getElementById("values").value.split(",").map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+}
+function getCardsForCategory(cat) {
+  return gameData.cards.filter(c => c.category === cat);
+}
+function esc(s) { return s.replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+// ── Save ──
+
+async function saveGameData() {
+  if (!currentCode || !currentPw) { toast("No game selected", false); return; }
+  const teamCount = parseInt(document.getElementById("teamCount").value) || 3;
+  const values = getValues();
+
+  gameData.cards = gameData.cards.filter(c =>
+    gameData.categories.includes(c.category)
+  );
+
+  try {
+    const res = await fetch("/api/games/" + currentCode + "/data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        password: currentPw,
+        teamCount: teamCount,
+        values: values,
+        categories: gameData.categories,
+        cards: gameData.cards,
+      })
+    });
+    if (!res.ok) throw new Error("Server returned " + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    toast("Saved!", true);
+  } catch (e) {
+    toast("Save failed — is the server running?", false);
+  }
+}
+
+// ── Init ──
+
+(async function() {
+  const restored = await restoreSession();
+  if (!restored) loadGames();
+})();
+</script>
+</body>
+</html>
