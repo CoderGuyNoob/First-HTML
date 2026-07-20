@@ -5,19 +5,12 @@ let isDailyDouble = false;
 let dailyDoubleWager = 0;
 const completed = new Set();
 
-function cardId(category, index) {
-  return `${category}__${index}`;
-}
-
-function getCardsForCategory(category) {
-  return GAME_DATA.cards.filter(c => c.category === category);
+function cardId(category, value) {
+  return `${category}__${value}`;
 }
 
 function findCard(category, value) {
-  const idx = VALUES.indexOf(value);
-  if (idx === -1) return null;
-  const cards = getCardsForCategory(category);
-  return cards[idx] || null;
+  return GAME_DATA.cards.find(c => c.category === category && c.value === value);
 }
 
 function getPointValue() {
@@ -41,19 +34,18 @@ function buildBoard() {
     board.appendChild(div);
   });
 
-  VALUES.forEach((value, rowIdx) => {
+  VALUES.forEach(value => {
     GAME_DATA.categories.forEach(category => {
-      const cards = getCardsForCategory(category);
-      const card = cards[rowIdx];
+      const card = findCard(category, value);
       const btn = document.createElement("button");
       btn.className = "tile";
-      if (!card || !card.question) {
+      if (!card) {
         btn.className += " empty";
         btn.disabled = true;
       } else {
-        btn.id = cardId(category, rowIdx);
+        btn.id = cardId(category, value);
         btn.textContent = `$${value}`;
-        btn.onclick = () => openCard(card, value);
+        btn.onclick = () => openCard(card);
         if (completed.has(btn.id)) btn.classList.add("used");
       }
       board.appendChild(btn);
@@ -86,20 +78,19 @@ function buildScoreboard() {
 
 // ── Modal ──
 
-function openCard(card, value) {
-  const idx = getCardsForCategory(card.category).indexOf(card);
-  const id = cardId(card.category, idx);
+function openCard(card) {
+  const id = cardId(card.category, card.value);
   if (completed.has(id)) return;
 
   activeCard = card;
-  currentValue = value;
+  currentValue = card.value;
   isDailyDouble = !!card.dailyDouble;
 
   if (isDailyDouble) {
     const maxWager = Math.max(0, ...scores);
     showWagerModal(card.category, maxWager);
   } else {
-    showQuestion(card, value);
+    showQuestion(card);
   }
 }
 
@@ -130,7 +121,7 @@ function confirmWager() {
   }
   dailyDoubleWager = wager;
   document.getElementById("wagerModal").classList.remove("show");
-  showQuestion(activeCard, dailyDoubleWager);
+  showQuestion(activeCard);
 }
 
 function cancelWager() {
@@ -139,11 +130,11 @@ function cancelWager() {
   isDailyDouble = false;
 }
 
-function showQuestion(card, value) {
+function showQuestion(card) {
   if (isDailyDouble) {
     document.getElementById("modalMeta").textContent = `${card.category} • Daily Double • $${dailyDoubleWager}`;
   } else {
-    document.getElementById("modalMeta").textContent = `${card.category} • $${value}`;
+    document.getElementById("modalMeta").textContent = `${card.category} • $${card.value}`;
   }
   document.getElementById("modalQuestion").textContent = card.question;
 
@@ -168,8 +159,7 @@ function backdropClose(event) {
 
 function markCompleteAndClose() {
   if (activeCard) {
-    const idx = getCardsForCategory(activeCard.category).indexOf(activeCard);
-    const id = cardId(activeCard.category, idx);
+    const id = cardId(activeCard.category, activeCard.value);
     completed.add(id);
     document.getElementById(id).classList.add("used");
   }
