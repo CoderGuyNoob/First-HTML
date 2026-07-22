@@ -172,15 +172,27 @@
   .cat-actions { display: flex; gap: 6px; margin-left: auto; }
 
   .q-row {
-    display: grid; grid-template-columns: 90px 1fr 1fr 40px 40px;
+    display: grid; grid-template-columns: 30px 90px 1fr 1fr 40px 40px;
     gap: 10px; align-items: start; margin-bottom: 10px;
     background: rgba(8,10,26,1); border-radius: 14px; padding: 12px;
     border: 1px solid rgba(30,42,100,1);
+    transition: opacity 0.2s, transform 0.2s;
   }
-  .q-row select {
-    width: 100%; height: 42px; text-align: center;
-    font-weight: 800; font-size: 14px; color: rgba(60,80,180,1);
+  .q-row.dragging { opacity: 0.4; transform: scale(0.98); }
+  .q-row.drag-over { border-color: rgba(60,80,180,1); box-shadow: 0 0 0 2px rgba(60,80,180,0.3); }
+  .q-row .pos-badge {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(60,80,180,1); color: rgba(255,255,255,1);
+    font-family: 'Fredoka One', cursive; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 18px; flex-shrink: 0;
   }
+  .q-row .drag-handle {
+    cursor: grab; color: rgba(80,90,140,1); font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 18px; user-select: none; letter-spacing: -2px;
+  }
+  .q-row .drag-handle:active { cursor: grabbing; }
   .q-row textarea { min-height: 42px; font-size: 13px; padding: 10px 12px; }
   .q-row .q-label {
     font-size: 10px; color: rgba(120,130,175,1); text-transform: uppercase;
@@ -381,10 +393,7 @@
           <label>Teams</label>
           <input type="number" id="teamCount" min="1" max="10" value="3">
         </div>
-        <div style="flex:1">
-          <label>Value Tiers (comma-separated)</label>
-          <input type="text" id="values" value="100, 200, 300, 400, 500">
-        </div>
+        <input type="hidden" id="values" value="100, 200, 300, 400, 500">
       </div>
     </div>
 
@@ -663,18 +672,19 @@ function buildCatCard(catName, ci) {
     renderAll();
   });
 
-  const cards = gameData.cards.filter(c => c.category === catName);
-  cards.forEach(c => card.appendChild(buildQRow(c, values)));
+  const cards = getCardsForCategory(catName);
+  cards.forEach((c, qi) => {
+    const row = buildQRow(c, qi, values, catName);
+    card.appendChild(row);
+  });
 
   const addBtn = document.createElement("button");
   addBtn.className = "btn btn-add";
   addBtn.style.marginTop = "8px";
   addBtn.innerHTML = "+ Add Question";
   addBtn.onclick = () => {
-    const usedVals = cards.map(c => c.value);
-    const freeVal = values.find(v => !usedVals.includes(v));
-    const newVal = freeVal || (values.length ? values[values.length - 1] : 100);
-    gameData.cards.push({ category: catName, value: newVal, question: "", answer: "" });
+    const catCards = getCardsForCategory(catName);
+    gameData.cards.push({ category: catName, order: catCards.length, dailyDouble: false, question: "", answer: "" });
     renderAll();
   };
   card.appendChild(addBtn);
@@ -682,23 +692,22 @@ function buildCatCard(catName, ci) {
   return card;
 }
 
-function buildQRow(c, values) {
+function buildQRow(c, qi, values, catName) {
   const row = document.createElement("div");
   row.className = "q-row";
+  row.draggable = true;
+  row.dataset.cat = catName;
+  row.dataset.idx = qi;
 
-  const valCol = document.createElement("div");
-  valCol.className = "q-col";
-  valCol.innerHTML = '<div class="q-label">Points</div>';
-  const valSel = document.createElement("select");
-  values.forEach(v => {
-    const opt = document.createElement("option");
-    opt.value = v; opt.textContent = "$" + v;
-    if (v === c.value) opt.selected = true;
-    valSel.appendChild(opt);
-  });
-  valSel.onchange = () => { c.value = parseInt(valSel.value); };
-  valCol.appendChild(valSel);
-  row.appendChild(valCol);
+  const dragHandle = document.createElement("div");
+  dragHandle.className = "drag-handle";
+  dragHandle.textContent = "\u2807";
+  row.appendChild(dragHandle);
+
+  const posBadge = document.createElement("div");
+  posBadge.className = "pos-badge";
+  posBadge.textContent = qi < values.length ? "$" + values[qi] : "$?";
+  row.appendChild(posBadge);
 
   const qCol = document.createElement("div");
   qCol.className = "q-col";
@@ -743,6 +752,97 @@ function buildQRow(c, values) {
   };
   row.appendChild(delBtn);
 
+  row.addEventListener("dragstart", (e) => {
+    row.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", "");
+    window._dragRow = row;
+  });
+  row.addEventListener("dragend", () => {
+    row.classList.remove("dragging");
+    document.querySelectorAll(".q-row.drag-over").forEach(r => r.classList.remove("drag-over"));
+    window._dragRow = null;
+  });
+  row.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    const dragging = window._dragRow;
+    if (dragging && dragging.dataset.cat === catName) {
+      row.classList.add("drag-over");
+    }
+  });
+  row.addEventListener("dragleave", () => {
+    row.classList.remove("drag-over");
+  });
+  row.addEventListener("drop", (e) => {
+    e.preventDefault();
+    row.classList.remove("drag-over");
+    const dragging = window._dragRow;
+    if (!dragging || dragging.dataset.cat !== catName) return;
+    const fromIdx = parseInt(dragging.dataset.idx);
+    const toIdx = parseInt(row.dataset.idx);
+    if (fromIdx === toIdx) return;
+    const catCards = gameData.cards.filter(c => c.category === catName);
+    const movingCard = catCards[fromIdx];
+    const otherCards = gameData.cards.filter(c => c !== movingCard);
+    const insertBefore = otherCards.findIndex(c => c === catCards[toIdx]);
+    if (insertBefore === -1) {
+      otherCards.push(movingCard);
+    } else {
+      otherCards.splice(insertBefore, 0, movingCard);
+    }
+    gameData.cards = otherCards;
+    updateOrderFields(catName);
+    renderAll();
+  });
+
+  let touchDragging = false;
+  dragHandle.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    touchDragging = true;
+    row.classList.add("dragging");
+    window._dragRow = row;
+  }, { passive: false });
+  dragHandle.addEventListener("touchmove", (e) => {
+    if (!touchDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const allRows = Array.from(document.querySelectorAll('.q-row[data-cat="' + catName + '"]'));
+    allRows.forEach(r => r.classList.remove("drag-over"));
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetRow = target ? target.closest(".q-row") : null;
+    if (targetRow && targetRow.dataset.cat === catName && targetRow !== row) {
+      targetRow.classList.add("drag-over");
+    }
+  }, { passive: false });
+  dragHandle.addEventListener("touchend", (e) => {
+    if (!touchDragging) return;
+    touchDragging = false;
+    row.classList.remove("dragging");
+    const touch = e.changedTouches[0];
+    const allRows = Array.from(document.querySelectorAll('.q-row[data-cat="' + catName + '"]'));
+    allRows.forEach(r => r.classList.remove("drag-over"));
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetRow = target ? target.closest(".q-row") : null;
+    if (targetRow && targetRow.dataset.cat === catName && targetRow !== row) {
+      const fromIdx = parseInt(row.dataset.idx);
+      const toIdx = parseInt(targetRow.dataset.idx);
+      const catCards = gameData.cards.filter(c => c.category === catName);
+      const movingCard = catCards[fromIdx];
+      const otherCards = gameData.cards.filter(c => c !== movingCard);
+      const insertBefore = otherCards.findIndex(c => c === catCards[toIdx]);
+      if (insertBefore === -1) {
+        otherCards.push(movingCard);
+      } else {
+        otherCards.splice(insertBefore, 0, movingCard);
+      }
+      gameData.cards = otherCards;
+      updateOrderFields(catName);
+      renderAll();
+    }
+    window._dragRow = null;
+  });
+
   return row;
 }
 
@@ -773,16 +873,21 @@ function getValues() {
 }
 function esc(s) { return s.replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 
+function getCardsForCategory(catName) {
+  return gameData.cards.filter(c => c.category === catName);
+}
+
+function updateOrderFields(catName) {
+  const cards = gameData.cards.filter(c => c.category === catName);
+  cards.forEach((c, i) => { c.order = i; });
+}
+
 // ── Save ──
 
 async function saveGameData() {
   if (!currentCode || !currentPw) { toast("No game selected", false); return; }
   const teamCount = parseInt(document.getElementById("teamCount").value) || 3;
   const values = getValues();
-
-  gameData.cards = gameData.cards.filter(c =>
-    gameData.categories.includes(c.category)
-  );
 
   try {
     const res = await fetch("/api/games/" + currentCode + "/data", {
