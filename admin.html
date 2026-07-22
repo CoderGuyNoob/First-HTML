@@ -275,6 +275,55 @@
   .pill-4 { background: rgba(206,147,216,1); }  .pill-5 { background: rgba(255,138,101,1); }
   .pill-6 { background: rgba(128,203,196,1); }  .pill-7 { background: rgba(60,80,180,1); }
   .pill-8 { background: rgba(102,187,106,1); }  .pill-9 { background: rgba(60,80,180,1); }
+
+  @media (max-width: 700px) {
+    .header { padding: 14px 16px; gap: 10px; flex-wrap: wrap; }
+    .header h1 { font-size: 18px; }
+    .header .back { font-size: 12px; padding: 6px 12px; }
+
+    .container { padding: 16px 12px; }
+    .bubble { padding: 16px 14px; border-radius: 18px; margin-bottom: 16px; }
+    .bubble-title { font-size: 14px; margin-bottom: 10px; }
+
+    .create-row { flex-direction: column; gap: 10px; }
+    .create-row > div { min-width: 0; width: 100%; }
+    .pw-row { flex-direction: column; }
+    .pw-row > div { width: 100%; }
+
+    .settings-row { flex-direction: column; gap: 10px; }
+    .settings-row > div { min-width: 0; width: 100%; }
+    .settings-row input[type="number"] { width: 100%; text-align: left; }
+
+    .q-row {
+      grid-template-columns: 36px 1fr;
+      grid-template-rows: auto auto auto auto;
+      gap: 8px;
+      padding: 14px 12px;
+    }
+    .q-row .drag-handle { grid-column: 1; grid-row: 1; margin-top: 0; }
+    .q-row .pos-badge { grid-column: 2; grid-row: 1; justify-self: end; margin-top: 0; }
+    .q-row .q-col:nth-child(3) { grid-column: 1 / -1; }
+    .q-row .q-col:nth-child(4) { grid-column: 1 / -1; }
+    .q-row .q-col:nth-child(5) { grid-column: 1; grid-row: 5; align-items: flex-start; }
+    .q-row .btn-del-q { grid-column: 2; grid-row: 5; margin-top: 0; justify-self: end; }
+    .q-row textarea { min-height: 56px; font-size: 14px; }
+    .q-row .q-label { font-size: 9px; }
+
+    .cat-header { flex-wrap: wrap; gap: 8px; }
+    .cat-header input { font-size: 15px; }
+    .cat-actions { width: 100%; justify-content: flex-end; }
+
+    .game-list-item { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
+    .game-list-item .game-code { font-size: 16px; }
+    .game-list-item .game-name { font-size: 13px; width: 100%; }
+    .game-list-item .game-actions { width: 100%; justify-content: flex-end; }
+
+    .actions { flex-direction: column; gap: 10px; padding: 8px 0 30px; }
+    .actions .btn { width: 100%; justify-content: center; }
+
+    .modal-box { padding: 20px 16px; border-radius: 18px; }
+    .modal-box h2 { font-size: 16px; }
+  }
 </style>
 </head>
 <body>

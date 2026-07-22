@@ -335,3 +335,66 @@ button, input { font: inherit; }
   .category { min-height: 74px; font-size: .62rem; padding: 5px; }
   .tile { min-height: 72px; font-size: 1.25rem; }
 }
+
+@media (max-width: 600px) {
+  body { padding: 8px; }
+
+  header { margin-bottom: 14px; }
+  h1 { font-size: 1.6rem; letter-spacing: 1px; }
+  .subtitle { font-size: .85rem; margin: 6px 0 12px; }
+
+  .controls { gap: 8px; margin: 10px 0 16px; }
+  .controls .btn { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
+
+  .scoreboard {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .team { padding: 10px; border-radius: 12px; }
+  .team-name { font-size: 12px; padding: 6px 8px; }
+  .score { font-size: 1.5rem; margin: 2px 0 6px; }
+  .score-buttons { gap: 6px; }
+  .score-buttons button { min-width: 40px; padding: 6px 10px; font-size: 13px; }
+
+  .board {
+    gap: 3px;
+    padding: 3px;
+    border-radius: 6px;
+  }
+  .category {
+    min-height: 52px;
+    font-size: .5rem;
+    padding: 4px;
+    border-radius: 4px;
+    letter-spacing: 0;
+  }
+  .tile {
+    min-height: 52px;
+    font-size: 1rem;
+    border-radius: 4px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+  .tile:hover { transform: none; }
+
+  .modal-backdrop { padding: 12px; }
+  .modal { padding: 16px; border-radius: 14px; border-width: 3px; }
+  .modal-meta { font-size: .75rem; margin-bottom: 12px; }
+  .clue { font-size: 1.1rem; margin: 12px 0 16px; }
+  .answer { font-size: 1rem; padding: 14px; }
+  .modal-actions { gap: 8px; }
+  .modal-actions .btn { padding: 8px 14px; font-size: 13px; }
+
+  .wager-modal { padding: 16px; }
+  .wager-title { font-size: 22px; }
+  .wager-input { font-size: 26px; padding: 12px; }
+
+  .footer-note { font-size: .75rem; margin-top: 12px; }
+  .admin-link { bottom: 8px; right: 8px; font-size: 10px; padding: 4px 8px; }
+}
+
+@media (max-width: 380px) {
+  .scoreboard { grid-template-columns: 1fr; }
+  .team { padding: 8px; }
+  .score { font-size: 1.3rem; }
+}
