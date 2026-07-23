@@ -5,12 +5,19 @@ let isDailyDouble = false;
 let dailyDoubleWager = 0;
 const completed = new Set();
 
-function cardId(category, value) {
-  return `${category}__${value}`;
+function cardId(category, index) {
+  return `${category}__${index}`;
+}
+
+function getCardsForCategory(category) {
+  return GAME_DATA.cards.filter(c => c.category === category);
 }
 
 function findCard(category, value) {
-  return GAME_DATA.cards.find(c => c.category === category && c.value === value);
+  const idx = VALUES.indexOf(value);
+  if (idx === -1) return null;
+  const cards = getCardsForCategory(category);
+  return cards[idx] || null;
 }
 
 function getPointValue() {
@@ -34,18 +41,19 @@ function buildBoard() {
     board.appendChild(div);
   });
 
-  VALUES.forEach(value => {
+  VALUES.forEach((value, rowIdx) => {
     GAME_DATA.categories.forEach(category => {
-      const card = findCard(category, value);
+      const cards = getCardsForCategory(category);
+      const card = cards[rowIdx];
       const btn = document.createElement("button");
       btn.className = "tile";
-      if (!card) {
+      if (!card || !card.question) {
         btn.className += " empty";
         btn.disabled = true;
       } else {
-        btn.id = cardId(category, value);
+        btn.id = cardId(category, rowIdx);
         btn.textContent = `$${value}`;
-        btn.onclick = () => openCard(card);
+        btn.onclick = () => openCard(card, value);
         if (completed.has(btn.id)) btn.classList.add("used");
       }
       board.appendChild(btn);
@@ -78,19 +86,20 @@ function buildScoreboard() {
 
 // ── Modal ──
 
-function openCard(card) {
-  const id = cardId(card.category, card.value);
+function openCard(card, value) {
+  const idx = getCardsForCategory(card.category).indexOf(card);
+  const id = cardId(card.category, idx);
   if (completed.has(id)) return;
 
   activeCard = card;
-  currentValue = card.value;
+  currentValue = value;
   isDailyDouble = !!card.dailyDouble;
 
   if (isDailyDouble) {
     const maxWager = Math.max(0, ...scores);
     showWagerModal(card.category, maxWager);
   } else {
-    showQuestion(card);
+    showQuestion(card, value);
   }
 }
 
@@ -121,7 +130,7 @@ function confirmWager() {
   }
   dailyDoubleWager = wager;
   document.getElementById("wagerModal").classList.remove("show");
-  showQuestion(activeCard);
+  showQuestion(activeCard, dailyDoubleWager);
 }
 
 function cancelWager() {
@@ -130,11 +139,11 @@ function cancelWager() {
   isDailyDouble = false;
 }
 
-function showQuestion(card) {
+function showQuestion(card, value) {
   if (isDailyDouble) {
     document.getElementById("modalMeta").textContent = `${card.category} • Daily Double • $${dailyDoubleWager}`;
   } else {
-    document.getElementById("modalMeta").textContent = `${card.category} • $${card.value}`;
+    document.getElementById("modalMeta").textContent = `${card.category} • $${value}`;
   }
   document.getElementById("modalQuestion").textContent = card.question;
 
@@ -159,7 +168,8 @@ function backdropClose(event) {
 
 function markCompleteAndClose() {
   if (activeCard) {
-    const id = cardId(activeCard.category, activeCard.value);
+    const idx = getCardsForCategory(activeCard.category).indexOf(activeCard);
+    const id = cardId(activeCard.category, idx);
     completed.add(id);
     document.getElementById(id).classList.add("used");
   }
@@ -212,4 +222,22 @@ document.addEventListener("keydown", (e) => {
 function initGame() {
   buildScoreboard();
   buildBoard();
+  updateThemeButton();
 }
+
+// ── Theme ──
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle("light-theme");
+  localStorage.setItem("jeopardy_theme", isLight ? "light" : "dark");
+  updateThemeButton();
+}
+
+function updateThemeButton() {
+  const btn = document.getElementById("themeToggle");
+  if (btn) btn.textContent = document.documentElement.classList.contains("light-theme") ? "Dark Mode" : "Light Mode";
+  const landingBtn = document.getElementById("landingThemeBtn");
+  if (landingBtn) landingBtn.textContent = document.documentElement.classList.contains("light-theme") ? "Dark Mode" : "Light Mode";
+}
+
+updateThemeButton();
