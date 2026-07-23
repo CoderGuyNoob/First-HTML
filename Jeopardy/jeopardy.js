@@ -222,4 +222,22 @@ document.addEventListener("keydown", (e) => {
 function initGame() {
   buildScoreboard();
   buildBoard();
+  updateThemeButton();
 }
+
+// ── Theme ──
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle("light-theme");
+  localStorage.setItem("jeopardy_theme", isLight ? "light" : "dark");
+  updateThemeButton();
+}
+
+function updateThemeButton() {
+  const btn = document.getElementById("themeToggle");
+  if (btn) btn.textContent = document.documentElement.classList.contains("light-theme") ? "Dark Mode" : "Light Mode";
+  const landingBtn = document.getElementById("landingThemeBtn");
+  if (landingBtn) landingBtn.textContent = document.documentElement.classList.contains("light-theme") ? "Dark Mode" : "Light Mode";
+}
+
+updateThemeButton();
