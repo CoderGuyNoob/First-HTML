@@ -52,7 +52,12 @@ ALLOWED_EXT = {".html", ".css", ".js", ".json", ".py", ".md", ".txt"}
 
 @app.route("/")
 def home():
-    return send_from_directory(".", "index.html")
+    return send_from_directory(".", "Home.html")
+
+
+@app.get("/home")
+def home_page():
+    return send_from_directory(".", "Home.html")
 
 
 @app.route("/<path:file>")
@@ -226,6 +231,21 @@ def admin_page():
 @app.get("/code")
 def code_admin_page():
     return send_from_directory(".", "code-admin.html")
+
+
+@app.get("/jeopardy")
+def jeopardy_page():
+    return send_from_directory("Jeopardy", "jeopardy.html")
+
+
+@app.get("/recipes")
+def recipes_page():
+    return send_from_directory(".", "recipes.html")
+
+
+@app.get("/about")
+def about_page():
+    return send_from_directory(".", "About.html")
 
 
 @app.get("/api/admin/files")
